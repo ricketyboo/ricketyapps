@@ -1,6 +1,8 @@
+use anyhow::Error;
 use super::{Credentials, User};
 use crate::app::auth::utils::hash_password;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
+use axum_session_auth::Authentication;
 use sqlx::{query_as, PgPool};
 use uuid::Uuid;
 
@@ -31,6 +33,20 @@ pub enum UserDbError {
 }
 
 impl UserRow {
+    async fn get_by_id(user_id: Uuid, pool: &PgPool)-> Result<Option<UserRow>, UserDbError> {
+        match query_as::<_, UserRow>("SELECT * FROM users WHERE id = $1")
+            .bind(user_id)
+            .fetch_one(pool)
+            .await {
+            Err(e) => {
+                println!("get_by_id: {e}");
+                Err(UserDbError::UnknownError)
+            },
+            Ok(u) => {
+                Ok(Some(u))
+            }
+        }
+    }
     async fn username_exists(username: &str, pool: &PgPool) -> Result<bool, UserDbError> {
         let username_exists: bool = sqlx::query_scalar(
             "SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)"
@@ -101,7 +117,7 @@ impl UserRow {
                 // note: doing a check even with no user row returned to minimise timing differences
                 // between not found and found user checks and avoid potential information leak
                 // about existence of user existence
-                // rethink if this is actually meaningful if we're using usernames and not emails to login; as we have to report  existence errors in registration anyway? 
+                // rethink if this is actually meaningful if we're using usernames and not emails to login; as we have to report  existence errors in registration anyway?
                 // Why is it okay to expose this info durng registration but not during login?
                 let password_hash = hash_password(&credentials.password).await.unwrap();
                 PasswordHash::new(&password_hash).expect("Unable to hash dummy password hash");
@@ -119,6 +135,40 @@ impl From<UserRow> for User {
         Self {
             id: value.id,
             username: value.username,
+            anonymous: false
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl Authentication<User, Uuid, PgPool> for User {
+    async fn load_user(userid: Uuid, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
+        match UserRow::get_by_id(userid, pool.unwrap()).await {
+            Ok(Some(u)) => {
+                Ok(User::from(u))
+            },
+            Ok(None) => {
+                Ok(User {
+                    id: Uuid::nil(),
+                    username: String::from(""),
+                    anonymous: true
+                })
+            }
+            Err(_) => {
+                Err(anyhow::anyhow!("Cannot get user"))
+            }            
+        }
+    }
+
+    fn is_authenticated(&self) -> bool {
+        !self.anonymous
+    }
+    
+    fn is_active(&self) -> bool {
+        !self.anonymous
+    }
+
+    fn is_anonymous(&self) -> bool {
+        self.anonymous
     }
 }

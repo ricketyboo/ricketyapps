@@ -124,6 +124,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-recursion"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b43422f69d8ff38f95f1b2bb76517c91589a924d1559a0e935d7c8ce0274c11"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "async-trait"
 version = "0.1.88"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -278,6 +289,30 @@ dependencies = [
  "tower-service",
  "tracing",
  "uuid",
+]
+
+[[package]]
+name = "axum_session_auth"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7302ab5019fe9d4138d91647205ca1f69c54211df7491847f4117efe91d473e"
+dependencies = [
+ "anyhow",
+ "async-recursion",
+ "async-trait",
+ "axum-core",
+ "axum_session",
+ "bytes",
+ "chrono",
+ "dashmap",
+ "futures",
+ "http",
+ "http-body",
+ "serde",
+ "tokio",
+ "tower-layer",
+ "tower-service",
+ "tracing",
 ]
 
 [[package]]
@@ -2376,9 +2411,12 @@ checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 name = "rickety-apps"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "argon2",
+ "async-trait",
  "axum",
  "axum_session",
+ "axum_session_auth",
  "axum_session_sqlx",
  "chrono",
  "console_error_panic_hook",

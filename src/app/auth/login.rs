@@ -1,4 +1,5 @@
-use crate::app::auth::Credentials;
+
+use crate::app::auth::{Credentials, User};
 use leptos::prelude::*;
 use leptos_router::components::A;
 
@@ -10,12 +11,19 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
     use leptos::prelude::expect_context;
     use crate::contexts::use_pool;
     use crate::app::auth::user::UserDbError;
+    use axum_session_auth::AuthSession;
+    use axum_session_sqlx::SessionPgPool;
+    use uuid::Uuid;
+    use sqlx::PgPool;
 
     let pool = use_pool()
         .ok_or_else(|| ServerFnError::new("Server error"))?;
 
     match UserRow::get_by_credentials(credentials, &pool).await {
         Ok(Some(u)) => {
+            let auth = leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
+            auth.login_user(u.id);
+
             println!("success? {u:?}");
             // todo: add support for navigating back to an intended url pre login.
             //  would have to have stored it in session during original auth check

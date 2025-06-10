@@ -1,4 +1,4 @@
-use rickety_apps::state::AppState;
+
 
 #[cfg(feature = "ssr")]
 #[tokio::main]
@@ -16,13 +16,23 @@ async fn main() {
         SessionLayer,
         SessionStore
     };
+    use sqlx::PgPool;
+    use uuid::Uuid;
+    use rickety_apps::state::AppState;
     use axum_session_sqlx::SessionPgPool;
+    use axum_session_auth::{
+        AuthConfig,
+        AuthSessionLayer
+    };
+
+    use rickety_apps::app::auth::*;
 
     let pool = get_pool().await.expect("Unable to get DB pool");
 
     let session_config = SessionConfig::default().with_table_name("sessions");
     // todo: redis sessions instead of pg
     let session_store = SessionStore::<SessionPgPool>::new(Some(SessionPgPool::from(pool.clone())), session_config).await.expect("Unable to initialise sessions");
+    let auth_config = AuthConfig::<Uuid>::default();
 
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
@@ -43,9 +53,14 @@ async fn main() {
             move || shell(leptos_options.clone())
         })
         .fallback(leptos_axum::file_and_error_handler::<AppState, _>(shell))
+        .layer(
+            AuthSessionLayer::<User, Uuid, SessionPgPool, PgPool>::new(
+                Some(pool.clone())
+            )
+            .with_config(auth_config)
+        )
         .layer(SessionLayer::new(session_store))
-
-    .with_state(app_state);
+        .with_state(app_state);
 
     // run our app with hyper
     // `axum::Server` is a re-export of `hyper::Server`

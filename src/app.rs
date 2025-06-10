@@ -7,7 +7,7 @@ use leptos_router::{
     StaticSegment,
 };
 
-mod auth;
+pub mod auth;
 
 mod places;
 
@@ -52,6 +52,7 @@ pub fn App() -> impl IntoView {
                     <A href="/">"Home"</A>
                 </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
+                    
                     // todo: routes guarded by auth state
                     <Route path=StaticSegment("") view=HomePage />
                     <Route path=StaticSegment("/login") view=Login />

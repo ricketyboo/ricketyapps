@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 mod login;
@@ -18,8 +18,9 @@ pub mod views {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct User {
-    id: Uuid,
-    username: String,
+    pub id: Uuid,
+    pub username: String,
+    pub anonymous: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
