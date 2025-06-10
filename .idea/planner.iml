@@ -15,6 +15,7 @@
       <sourceFolder url="file://$MODULE_DIR$/bin/api/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/core/app_helpers/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/core/db/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/views/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
