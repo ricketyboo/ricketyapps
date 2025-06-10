@@ -43,15 +43,26 @@ pub fn UserView() -> impl IntoView {
                 if let Ok(users) = users_data.await {
                     view! {
                         <For each=move || users.clone() key=|u| u.id let(user)>
-                            <p>{user.username}</p>
+                            <UserListItem user=user />
                         </For>
                     }
                         .into_any()
                 } else {
+
                     view! { <p>"no users"</p> }
                         .into_any()
                 }
             })}
         </Suspense>
+    }
+}
+
+#[component]
+fn UserListItem(user: User) -> impl IntoView {
+    use leptos_router::components::A;
+    view! {
+        <p>
+            <A href=user.id.to_string()>{user.username}</A>
+        </p>
     }
 }
