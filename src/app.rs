@@ -1,7 +1,7 @@
 use crate::app::auth::AuthRoutes;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
-use leptos_router::components::{ProtectedRoute, A};
+use leptos_router::components::{Outlet, ProtectedParentRoute, ProtectedRoute, Route, A};
 use leptos_router::{
     components::{Router, Routes},
     path,
@@ -60,18 +60,27 @@ pub fn App() -> impl IntoView {
                     }>{move || if logged_in.get() { "Log Out" } else { "Log In" }}</button>
                 </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
-                    <ProtectedRoute
+                    <ProtectedParentRoute
                         path=path!("")
                         condition=move || Some(logged_in.get())
                         redirect_path=|| "/login"
-                        view=HomePage
-                    />
-                    <ProtectedRoute
-                        path=path!("places")
-                        condition=move || Some(logged_in.get())
-                        redirect_path=|| "/login"
-                        view=PlacePage
-                    />
+                        view=|| {
+                            view! {
+                                <div style="border: 1px solid #00f">
+                                    <p>
+                                        <small>"app layout"</small>
+                                    </p>
+                                    <Outlet />
+                                    <p>
+                                        <small>"end app layout"</small>
+                                    </p>
+                                </div>
+                            }
+                        }
+                    >
+                        <Route path=path!("") view=HomePage />
+                        <Route path=path!("places") view=PlacePage />
+                    </ProtectedParentRoute>
                     <AuthRoutes logged_in=logged_in />
                 </Routes>
             </main>
