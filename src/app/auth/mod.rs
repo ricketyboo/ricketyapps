@@ -11,13 +11,23 @@ pub struct Credentials {
 
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<(), ServerFnError> {
+    use axum::http::StatusCode;
+    
+    // todo: look up user
+    // todo: compare pw hash
+    
     if credentials.password == "correct" {
         log!("try_login successful login");
+        // todo: add support for navigating back to an intended url pre login.
+        //  would have to have stored it in session during original auth check
+        leptos_axum::redirect("/");
         return Ok(())
     }
+    
     log!("try_login failed login");
-    // todo: return 401
-    Err(ServerFnError::Response("Invalid credentials".into()))
+    let opts = expect_context::<leptos_axum::ResponseOptions>();
+    opts.set_status(StatusCode::UNAUTHORIZED);
+    Err(ServerFnError::ServerError("Invalid credentials".into()))
 }
 
 #[component]

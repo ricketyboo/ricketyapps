@@ -45,10 +45,12 @@ pub fn App() -> impl IntoView {
             <main>
                 // todo: proper aria labels and structure
                 <nav id="main-nav">
+                    // todo: routes visible by auth state
                     <A href="login">"Login"</A>
                     <A href="/">"Home"</A>
                 </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
+                    // todo: routes guarded by auth state
                     <Route path=StaticSegment("") view=HomePage />
                     <Route path=StaticSegment("/login") view=Login />
                 </Routes>

@@ -1684,6 +1684,7 @@ dependencies = [
  "leptos_router",
  "serde",
  "tokio",
+ "uuid",
  "wasm-bindgen",
 ]
 
