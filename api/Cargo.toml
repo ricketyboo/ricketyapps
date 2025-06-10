@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 # repo deps
-app.workspace = true
+app_helpers.workspace = true
 db.workspace = true
 domains.workspace = true
 # shared deps

@@ -26,7 +26,7 @@ CREATE EXTENSION IF NOT EXISTS moddatetime;
 ```
 
 ```postgresql
--- create user for the app
+-- create user for the app_helpers
 CREATE USER planner WITH password 'planner_pass';
 GRANT ALL PRIVILEGES ON DATABASE planner_dev TO planner;
 ALTER DATABASE planner_dev OWNER TO planner;

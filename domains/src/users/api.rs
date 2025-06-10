@@ -1,5 +1,5 @@
 use super::entity::{CreateInput, CreateResult, DetailView, Entity, ListItem};
-use app::AppState;
+use app_helpers::AppState;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::routing::get;

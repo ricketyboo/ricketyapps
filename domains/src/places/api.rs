@@ -1,6 +1,6 @@
 use super::entity::{CreateEntity, CreateInput, CreateResult, DetailView, Entity, ListItem};
-use app::AppState;
-use app::axum_welds::create_handler;
+use app_helpers::axum_welds::create_handler;
+use app_helpers::AppState;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::routing::get;

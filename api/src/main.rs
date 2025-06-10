@@ -1,8 +1,8 @@
-use app::{AppConfig, AppState};
+use app_helpers::{AppConfig, AppState};
 use axum::extract::{Request, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post};
-use axum::{Json, Router, ServiceExt, debug_handler};
+use axum::{debug_handler, Json, Router, ServiceExt};
 use db::{get_client, get_pool};
 use dotenvy::dotenv;
 
@@ -13,8 +13,8 @@ use tower_layer::Layer;
 
 #[tokio::main]
 async fn main() {
-    let (app_state, app_config) = init().await;
-    serve(app_state, app_config).await;
+    let (app_state, app_helpers) = init().await;
+    serve(app_state, app_helpers).await;
 }
 
 async fn init() -> (AppConfig, AppState) {
@@ -24,7 +24,7 @@ async fn init() -> (AppConfig, AppState) {
     (AppConfig::from_env(), AppState::new(client))
 }
 
-async fn serve(app_config: AppConfig, app_state: AppState) {
+async fn serve(app_helpers: AppConfig, app_state: AppState) {
     // let pool = get_pool().await.unwrap();
     // let users = UserRepository::all(&pool).await;
     // println!("Users {:?}", users);
@@ -42,7 +42,7 @@ async fn serve(app_config: AppConfig, app_state: AppState) {
     //     .with_state(app_state.clone());
     let app = NormalizePathLayer::trim_trailing_slash().layer(router);
     //
-    let addr = app_config.addr();
+    let addr = app_helpers.addr();
     println!("Listening on {addr}");
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, ServiceExt::<Request>::into_make_service(app))
