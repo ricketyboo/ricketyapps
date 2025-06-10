@@ -1,6 +1,8 @@
-[package]
-name = "trip-planner"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "2"
+members = ['api', "lib/*"]
 
-[dependencies]
+[workspace.dependencies]
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-native-tls"] }
+tokio = "1.45.0"
+dotenvy = "0.15"
