@@ -4,6 +4,7 @@ use leptos_router::{
     components::{Route, Router, Routes},
     StaticSegment,
 };
+use views::PlacePage;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -61,9 +62,4 @@ fn HomePage() -> impl IntoView {
         <h1>"Welcome to Leptos!"</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
     }
-}
-
-#[component]
-fn PlacePage() -> impl IntoView {
-    view! { <h1>Places</h1> }
 }

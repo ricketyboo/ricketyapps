@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bin/api", "lib/*/*", "domains", "server", "frontend", "app"]
+members = ["bin/api", "lib/*/*", "domains", "server", "frontend", "app", "views"]
 
 # need to be applied only to wasm build
 [profile.release]
@@ -13,6 +13,7 @@ app = { path = "app", default-features = false }
 app_helpers = { path = "lib/core/app_helpers" }
 db = { path = "lib/core/db" }
 domains = { path = "domains" }
+views = { path = "views" }
 
 dotenvy = "0.15"
 
