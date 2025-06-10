@@ -9,6 +9,8 @@ use leptos_router::{
 
 mod auth;
 
+mod places;
+
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
         <!DOCTYPE html>
