@@ -11,8 +11,18 @@ async fn main() {
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use rickety_apps::app::*;
     use rickety_apps::db::get_pool;
+    use axum_session::{
+        SessionConfig,
+        SessionLayer,
+        SessionStore
+    };
+    use axum_session_sqlx::SessionPgPool;
 
     let pool = get_pool().await.expect("Unable to get DB pool");
+
+    let session_config = SessionConfig::default().with_table_name("sessions");
+    // todo: redis sessions instead of pg
+    let session_store = SessionStore::<SessionPgPool>::new(Some(SessionPgPool::from(pool.clone())), session_config).await.expect("Unable to initialise sessions");
 
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
@@ -33,7 +43,9 @@ async fn main() {
             move || shell(leptos_options.clone())
         })
         .fallback(leptos_axum::file_and_error_handler::<AppState, _>(shell))
-        .with_state(app_state);
+        .layer(SessionLayer::new(session_store))
+
+    .with_state(app_state);
 
     // run our app with hyper
     // `axum::Server` is a re-export of `hyper::Server`
