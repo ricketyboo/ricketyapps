@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[cfg(feature = "ssr")]
-mod ssr;
+mod user;
 
 pub struct User {
     id: Uuid,
@@ -21,7 +21,7 @@ pub struct Credentials {
 
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<(), ServerFnError> {
-    use crate::app::auth::ssr::UserRow;
+    use crate::app::auth::user::UserRow;
     use axum::http::StatusCode;
     use crate::db::get_pool;
 
@@ -32,7 +32,9 @@ pub async fn try_login(credentials: Credentials) -> Result<(), ServerFnError> {
         log!("try_login successful login");
         // todo: add support for navigating back to an intended url pre login.
         //  would have to have stored it in session during original auth check
+        // todo: set cookie
         leptos_axum::redirect("/");
+
         return Ok(())
     }
     
