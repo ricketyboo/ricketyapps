@@ -1,7 +1,7 @@
 use crate::app::auth::AuthRoutes;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
-use leptos_router::components::{Outlet, ProtectedParentRoute, ProtectedRoute, Route, A};
+use leptos_router::components::{Outlet, ProtectedParentRoute, Route, A};
 use leptos_router::{
     components::{Router, Routes},
     path,
@@ -35,7 +35,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     // todo: read from auth session
-    let (logged_in, set_logged_in) = signal(false);
+    let (logged_in, set_logged_in) = signal(true);
 
     view! {
         // injects a stylesheet into the document <head>
@@ -49,16 +49,7 @@ pub fn App() -> impl IntoView {
         <Router>
             <main>
                 // todo: proper aria labels and structure
-                <nav id="main-nav">
-                    <Show when=move || logged_in()>
-                        <A href="/">"Home"</A>
-                        <A href="/places">"Places"</A>
-                    </Show>
-                    // todo: trigger auth clear
-                    <button on:click=move |_| {
-                        set_logged_in.update(|n| *n = !*n)
-                    }>{move || if logged_in.get() { "Log Out" } else { "Log In" }}</button>
-                </nav>
+
                 <Routes fallback=|| "Page not found.".into_view()>
                     <ProtectedParentRoute
                         path=path!("")
@@ -66,10 +57,14 @@ pub fn App() -> impl IntoView {
                         redirect_path=|| "/login"
                         view=|| {
                             view! {
-                                <div style="border: 1px solid #00f">
+                                <div id="app-layout" class="root-layout" style="">
                                     <p>
                                         <small>"app layout"</small>
                                     </p>
+                                    <nav id="main-nav">
+                                        <A href="/">"Home"</A>
+                                        <A href="/places">"Places"</A>
+                                    </nav>
                                     <Outlet />
                                     <p>
                                         <small>"end app layout"</small>
@@ -84,6 +79,10 @@ pub fn App() -> impl IntoView {
                     <AuthRoutes logged_in=logged_in />
                 </Routes>
             </main>
+            // todo: trigger auth clear
+            <button on:click=move |_| {
+                set_logged_in.update(|n| *n = !*n)
+            }>{move || if logged_in.get() { "Log Out" } else { "Log In" }}</button>
         </Router>
     }
 }

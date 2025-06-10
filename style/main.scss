@@ -61,3 +61,25 @@ form label {
 	display: block;
 	margin-bottom: 1rem;
 }
+
+body {
+	display: flex;
+	flex-direction: column;
+}
+
+main {
+	display: flex;
+	flex: auto;
+}
+
+.root-layout {
+	flex: 1 1 auto;
+}
+
+#app-layout {
+	border: 1px solid #00f;
+}
+
+#auth-layout {
+	border: 1px solid #f00;
+}

@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-
+use leptos_router::components::A;
 use super::{Credentials};
 
 #[server]
@@ -77,6 +77,7 @@ pub fn Register() -> impl IntoView {
             <label>"username"<input name="credentials[username]" /></label>
             <label>"password"<input name="credentials[password]" type="password" /></label>
             <button type="submit">Register</button>
+            <small>Already have an account? <A href="/login">Login</A></small>
         </ActionForm>
     }
 }

@@ -14,7 +14,6 @@ mod user;
 #[cfg(feature = "ssr")]
 mod utils;
 
-
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct User {
     pub id: Uuid,
@@ -35,7 +34,7 @@ pub fn AuthRoutes(logged_in: ReadSignal<bool>) -> impl MatchNestedRoutes + Clone
             path=path!("")
             view=|| {
                 view! {
-                    <div style="border: 1px solid #f00">
+                    <div id="auth-layout" class="root-layout">
                         <p>
                             <small>"auth layout"</small>
                         </p>
