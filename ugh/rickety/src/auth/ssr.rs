@@ -1,4 +1,4 @@
-use crate::core::auth::User;
+use crate::auth::User;
 use sqlx::{query_as, PgPool};
 use uuid::Uuid;
 

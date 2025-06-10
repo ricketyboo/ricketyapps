@@ -1,17 +1,9 @@
-use crate::core::admin::{AdminView, UserListView};
-use crate::core::auth::Login;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
-use leptos_router::components::{ParentRoute, A};
 use leptos_router::{
     components::{Route, Router, Routes},
     StaticSegment,
 };
-use views::PlacePage;
-
-mod core;
-#[cfg(feature = "ssr")]
-pub mod ssr;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -37,30 +29,18 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/planner.css" />
+        // injects a stylesheet into the document <head>
+        // id=leptos means cargo-leptos will hot-reload this stylesheet
+        <Stylesheet id="leptos" href="/pkg/rickety-apps.css" />
 
         // sets the document title
-        <Title text="Welcome to Planner" />
+        <Title text="Welcome to Leptos" />
 
         // content for this welcome page
         <Router>
             <main>
-                <nav>
-                    <A href="/">Home</A>
-                    <A href="/places">Places</A>
-                    // todo: make admin routes only visible if a role check allows them
-                    <A href="/admin/users">User Admin</A>
-                </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=HomePage />
-                    <Route path=StaticSegment("/login") view=Login />
-                    <Route path=StaticSegment("/places") view=PlacePage />
-                    // todo: make admin routes protected by a role check
-                    // https://github.com/leptos-rs/leptos/discussions/2424 vs ProtectedRoute may not work well in an async scenario
-                    <ParentRoute path=StaticSegment("/admin") view=AdminView>
-                        // todo: add a sub nav view inside admin, and make admin view able to render itself with a "" route
-                        <Route path=StaticSegment("users") view=UserListView />
-                    </ParentRoute>
                 </Routes>
             </main>
         </Router>
@@ -75,7 +55,7 @@ fn HomePage() -> impl IntoView {
     let on_click = move |_| *count.write() += 1;
 
     view! {
-        <h1>"Leptos make browser go whrrr "</h1>
+        <h1>"Welcome to Leptos!"</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
     }
 }
