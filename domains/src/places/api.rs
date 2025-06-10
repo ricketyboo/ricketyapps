@@ -1,4 +1,4 @@
-use super::entity::{CreateInput, CreateResult, DetailView, Entity, ListItem};
+use super::entity::{CreateEntity, CreateInput, CreateResult, DetailView, Entity, ListItem};
 use app::AppState;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
@@ -24,6 +24,7 @@ async fn get_all(State(state): State<AppState>) -> (StatusCode, Json<Vec<ListIte
         .collect();
     (StatusCode::OK, Json(list))
 }
+
 #[axum::debug_handler]
 async fn get_one(
     State(state): State<AppState>,
@@ -36,11 +37,14 @@ async fn get_one(
     )
 }
 
+#[axum::debug_handler]
 async fn create(
     State(state): State<AppState>,
     Json(input): Json<CreateInput>,
 ) -> (StatusCode, Json<CreateResult>) {
-    let mut model: DbState<Entity> = DbState::new_uncreated(input.into());
+    let mut model: DbState<CreateEntity> = DbState::new_uncreated(input.into());
+
     model.save(&state.client).await.unwrap();
-    (StatusCode::OK, Json(CreateResult::from(model.into_inner())))
+    let result: CreateResult = model.into_inner().into();
+    (StatusCode::OK, Json(result))
 }
