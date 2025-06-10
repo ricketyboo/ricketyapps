@@ -1,3 +1,21 @@
+# Rust Full Stack Experiments
+
+Learning the stack. This is an experimental repo that will be turning into a different project eventually.
+
+Assembling from various references including example and projects folders in the leptos-rs core repo.
+
+The current project structure is not as clean as I'd like, and will be refactored once I'm out of experimenting stage and into actual knowing how the pieces fit stage.   
+
+Current version:
+
+- Rust (Nightly)
+- SQLX
+- PostgreSQL
+- Axum
+- Leptos
+
+Previous version was using Welds and was API only.  
+
 ## Initial dev environment setup
 
 Install tooling
@@ -56,17 +74,5 @@ DATABASE_URL=postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB
 
 ```shell
 podman start postgres
-podman logs postgres
+cargo leptos watch
 ```
-
----
-
-Domain Folders
-
-- Contain entities
-- Contain DB migrations for each domain
-
-Todo
-
-- Decide on how to run migrations that are co-dependent
-    - knowing that if they're coupled, what's the point of isolating them
