@@ -10,7 +10,6 @@ pub struct User {
     username: String,
 }
 
-
 pub mod ssr {
     use crate::core::auth::User;
     use leptos::prelude::ServerFnError;
@@ -18,6 +17,7 @@ pub mod ssr {
 
     #[server]
     pub async fn get_users() -> Result<Vec<User>, ServerFnError> {
+        tokio::time::sleep(std::time::Duration::from_secs(3)).await;
         Ok(vec![
             User {
                 id: uuid::Uuid::new_v4(),
@@ -33,22 +33,23 @@ pub mod ssr {
 
 #[component]
 pub fn UserView() -> impl IntoView {
-    let users_resource = OnceResource::new_blocking(get_users());
+    let users_data = OnceResource::new(get_users());
 
     view! {
-        <Suspense fallback=|| ()>
+        <Suspense fallback=|| {
+            view! { <p>Loading...</p> }
+        }>
             {move || Suspend::new(async move {
-                let users = match users_resource.await {
-                    Ok(u) => u,
-                    Err(_) => panic!("Shit's fucked"),
-                };
-                view! {
-                    <For each=move || users.clone() key=|u| u.id let(user)>
-                        <div>
-                            <p>{user.id.to_string()}</p>
-                            <p>{user.username.to_string()}</p>
-                        </div>
-                    </For>
+                if let Ok(users) = users_data.await {
+                    view! {
+                        <For each=move || users.clone() key=|u| u.id let(user)>
+                            <p>{user.username}</p>
+                        </For>
+                    }
+                        .into_any()
+                } else {
+                    view! { <p>"no users"</p> }
+                        .into_any()
                 }
             })}
         </Suspense>
