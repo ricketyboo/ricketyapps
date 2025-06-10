@@ -44,8 +44,8 @@ pub fn App() -> impl IntoView {
             <main>
                 <nav>
                     <A href="/">Home</A>
-                    <A href="/places">places</A>
-                    <A href="/users">users</A>
+                    <A href="/places">Places</A>
+                    <A href="/users">Users</A>
                 </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=HomePage />
@@ -65,7 +65,7 @@ fn HomePage() -> impl IntoView {
     let on_click = move |_| *count.write() += 1;
 
     view! {
-        <h1>"Welcome to Leptos!"</h1>
+        <h1>"Leptos make browser go whrrr "</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
     }
 }

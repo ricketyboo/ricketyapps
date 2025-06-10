@@ -18,17 +18,23 @@ pub mod ssr {
 
     #[server]
     pub async fn get_users() -> Result<Vec<User>, ServerFnError> {
-        tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         Ok(vec![
             User {
                 id: Uuid::new_v4(),
-                username: "Bobert".into(),
+                username: "Boberta".into(),
             },
             User {
                 id: Uuid::new_v4(),
                 username: "Susandy".into(),
             },
         ])
+    }
+    
+    impl User {
+        fn hash_password(password: &str) -> Result<(), ()> {
+            todo!()
+        }
     }
 
 }
