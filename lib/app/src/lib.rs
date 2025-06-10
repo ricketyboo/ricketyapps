@@ -1,5 +1,5 @@
-use sqlx::{Pool, Postgres};
 use std::env;
+use welds::connections::any::AnyClient;
 
 #[derive(Clone)]
 pub struct AppConfig {
@@ -25,11 +25,11 @@ impl AppConfig {
 
 #[derive(Clone)]
 pub struct AppState {
-    pub pool: Pool<Postgres>,
+    pub client: AnyClient,
 }
 
 impl AppState {
-    pub fn new(pool: Pool<Postgres>) -> Self {
-        Self { pool }
+    pub fn new(client: AnyClient) -> Self {
+        Self { client }
     }
 }

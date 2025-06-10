@@ -1,13 +1,16 @@
 use app::{AppConfig, AppState};
 use axum::extract::{Request, State};
 use axum::http::StatusCode;
-use axum::routing::get;
-use axum::{Json, Router, ServiceExt};
-use db::get_pool;
+use axum::routing::{get, post};
+use axum::{Json, Router, ServiceExt, debug_handler};
+use db::get_client;
 use dotenvy::dotenv;
-use models::Place;
+use models::{CreatePlaceDto, Place};
 use tower_http::normalize_path::NormalizePathLayer;
 use tower_layer::Layer;
+
+use welds::prelude::VecStateExt;
+use welds::state::DbState;
 
 #[tokio::main]
 async fn main() {
@@ -18,13 +21,14 @@ async fn main() {
 async fn init() -> (AppConfig, AppState) {
     // note: dotenvy .16+ will change how this works, using EnvLoader
     dotenv().expect(".env file not found");
-    let pool = get_pool().await.expect("Oh no, pool is dead.");
-    (AppConfig::from_env(), AppState::new(pool))
+    let client = get_client().await;
+    (AppConfig::from_env(), AppState::new(client))
 }
 
 async fn serve(app_config: AppConfig, app_state: AppState) {
     let router = Router::new()
         .route("/", get(get_places))
+        .route("/", post(post_places))
         .with_state(app_state.clone());
     let app = NormalizePathLayer::trim_trailing_slash().layer(router);
 
@@ -37,9 +41,19 @@ async fn serve(app_config: AppConfig, app_state: AppState) {
 }
 
 async fn get_places(State(state): State<AppState>) -> (StatusCode, Json<Vec<Place>>) {
-    // async fn what() -> (StatusCode, Json<Vec<&'static str>>) {
-    let places = sqlx::query_as!(models::Place, "SELECT id, name FROM places")
-        .fetch_all(&state.pool)
-        .await;
-    (StatusCode::OK, Json(places.unwrap()))
+    let places = Place::all().run(&state.client).await;
+    (StatusCode::OK, Json(places.unwrap().into_inners()))
+}
+
+#[debug_handler]
+async fn post_places(
+    State(state): State<AppState>,
+    Json(create): Json<CreatePlaceDto>,
+) -> (StatusCode, Json<Place>) {
+    let mut place = DbState::new_uncreated(Place {
+        id: 0,
+        name: create.name,
+    });
+    place.save(&state.client).await.expect("oh no save failure");
+    (StatusCode::OK, Json(place.into_inner()))
 }

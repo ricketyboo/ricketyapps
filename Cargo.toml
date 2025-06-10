@@ -11,3 +11,5 @@ tokio = "1.45.0"
 dotenvy = "0.15"
 secrecy = "0.10"
 serde = { version = "1", features = ["derive"] }
+welds = { version = "0.4", features = ["postgres", "migrations"] }
+utility-types = "*"

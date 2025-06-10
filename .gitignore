@@ -1,2 +1,10 @@
 /target
 /.env
+
+# MacOS
+.DS_Store
+
+dist/
+
+# Dependency directories
+node_modules/

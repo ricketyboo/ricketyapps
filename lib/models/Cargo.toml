@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 serde.workspace = true
+welds.workspace = true
+utility-types.workspace = true

@@ -6,4 +6,4 @@ edition = "2024"
 [dependencies]
 secrecy.workspace = true
 sqlx.workspace = true
-
+welds.workspace = true
