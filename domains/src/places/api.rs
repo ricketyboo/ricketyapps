@@ -1,5 +1,5 @@
 use super::entity::{CreateEntity, CreateInput, CreateResult, DetailView, Entity, ListItem};
-use app::AppState;
+use app::{AppState, create_handler};
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::routing::get;
@@ -9,7 +9,10 @@ use welds::prelude::{DbState, VecStateExt};
 
 pub fn routes() -> Router<AppState> {
     Router::new()
-        .route("/", get(get_all).post(create))
+        .route(
+            "/",
+            get(get_all).post(create_handler::<CreateEntity, CreateInput, CreateResult>),
+        )
         .route("/{id}", get(get_one))
 }
 
@@ -35,16 +38,4 @@ async fn get_one(
         StatusCode::OK,
         Json(DetailView::from(result.unwrap().unwrap().into_inner())),
     )
-}
-
-#[axum::debug_handler]
-async fn create(
-    State(state): State<AppState>,
-    Json(input): Json<CreateInput>,
-) -> (StatusCode, Json<CreateResult>) {
-    let mut model: DbState<CreateEntity> = DbState::new_uncreated(input.into());
-
-    model.save(&state.client).await.unwrap();
-    let result: CreateResult = model.into_inner().into();
-    (StatusCode::OK, Json(result))
 }
