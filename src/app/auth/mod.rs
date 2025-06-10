@@ -1,17 +1,18 @@
 use leptos::ev::SubmitEvent;
 use leptos::logging::log;
 use leptos::prelude::*;
+use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[cfg(feature = "ssr")]
 mod user;
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
     id: Uuid,
     username: String,
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Credentials {
@@ -76,6 +77,38 @@ pub fn Login() -> impl IntoView {
         <ActionForm action=submit_action on:submit:capture=validate>
             <label>"username"<input name="username" /></label>
             <label>"password"<input name="password" type="password" /></label>
+            <button>Login</button>
+            <A href="/register">Register</A>
+        </ActionForm>
+    }
+}
+
+#[server]
+pub async fn try_register(credentials: Credentials) -> Result<User, ServerFnError> {
+    use crate::app::auth::user::UserRow;
+    use axum::http::StatusCode;
+    use crate::db::get_pool;
+    
+    // todo: move into main and pass via state/context
+    let pool = get_pool().await.ok().unwrap();
+    let opts = expect_context::<leptos_axum::ResponseOptions>();
+    if let Some(user_row) = UserRow::create(credentials, &pool).await {
+        opts.set_status(StatusCode::CREATED);
+        // todo: initialise session
+        leptos_axum::redirect("/login");
+        return Ok(User::from(user_row))
+    }
+    opts.set_status(StatusCode::BAD_REQUEST);
+    Err(ServerFnError::ServerError("Unable to register".into()))
+}
+#[component]
+pub fn Register() -> impl IntoView {
+    let submit_action = ServerAction::<TryRegister>::new();
+    view! {
+        <h2>"Register"</h2>
+        <ActionForm action=submit_action>
+            <label>"username"<input name="credentials[username]" /></label>
+            <label>"password"<input name="credentials[password]" type="password" /></label>
             <button>Login</button>
         </ActionForm>
     }

@@ -11,6 +11,24 @@ pub struct UserRow {
 }
 
 impl UserRow {
+    pub async fn create(credentials: Credentials, pool: &PgPool) -> Option<UserRow> {
+        // todo: hash_password
+        let password_hash = credentials.password;
+
+        match query_as::<_, UserRow>("INSERT INTO users (username, password_hash) VALUES ( $1,  $2) returning *")
+            .bind(credentials.username)
+            .bind(password_hash)
+            .fetch_one(pool)
+            .await {
+            Err(e) => {
+                println!("{e}");
+                None
+            },
+            Ok(u) => {
+                Some(u)
+            }
+        }
+    }
     pub async fn get_by_username(username: String, pool: &PgPool) -> Option<UserRow> {
         match query_as::<_, UserRow>("SELECT * FROM users WHERE username = $1")
             .bind(username)

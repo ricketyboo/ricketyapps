@@ -1,4 +1,4 @@
-use crate::app::auth::Login;
+use crate::app::auth::{Login, Register};
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::components::A;
@@ -55,6 +55,7 @@ pub fn App() -> impl IntoView {
                     // todo: routes guarded by auth state
                     <Route path=StaticSegment("") view=HomePage />
                     <Route path=StaticSegment("/login") view=Login />
+                    <Route path=StaticSegment("/register") view=Register />
                 </Routes>
             </main>
         </Router>
