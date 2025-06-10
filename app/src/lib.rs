@@ -1,3 +1,4 @@
+use leptos::attr::href;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
@@ -37,9 +38,13 @@ pub fn App() -> impl IntoView {
         // content for this welcome page
         <Router>
             <main>
+                <nav>
+                    <a href="/">Home</a>
+                    <a href="/places">places</a>
+                </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
-                    <Route path=StaticSegment("") view=HomePage/>
                     <Route path=StaticSegment("") view=HomePage />
+                    <Route path=StaticSegment("/places") view=PlacePage />
                 </Routes>
             </main>
         </Router>
@@ -57,4 +62,9 @@ fn HomePage() -> impl IntoView {
         <h1>"Welcome to Leptos!"</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
     }
+}
+
+#[component]
+fn PlacePage() -> impl IntoView {
+    view! { <h1>Places</h1> }
 }
