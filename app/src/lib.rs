@@ -1,4 +1,5 @@
 use crate::core::admin::{AdminView, UserListView};
+use crate::core::auth::Login;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::components::{ParentRoute, A};
@@ -52,9 +53,10 @@ pub fn App() -> impl IntoView {
                 </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=HomePage />
+                    <Route path=StaticSegment("/login") view=Login />
                     <Route path=StaticSegment("/places") view=PlacePage />
                     // todo: make admin routes protected by a role check
-                    //  https://github.com/leptos-rs/leptos/discussions/2424 vs ProtectedRoute may not work well in an async scenario
+                    // https://github.com/leptos-rs/leptos/discussions/2424 vs ProtectedRoute may not work well in an async scenario
                     <ParentRoute path=StaticSegment("/admin") view=AdminView>
                         // todo: add a sub nav view inside admin, and make admin view able to render itself with a "" route
                         <Route path=StaticSegment("users") view=UserListView />
