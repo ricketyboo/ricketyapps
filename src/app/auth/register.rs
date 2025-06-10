@@ -26,14 +26,16 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
         }
         Err(e) => {
             match e {
-                UserDbError::UserExists => {
+                UserDbError::UsernameExists => {
                     opts.set_status(StatusCode::CONFLICT);
-                    Err(ServerFnError::ServerError(e.to_string()))
-                },
+                    Err(ServerFnError::new(e.to_string()))
+                }
                 UserDbError::UnknownError => {
                     opts.set_status(StatusCode::BAD_REQUEST);
-                    Err(ServerFnError::ServerError("Unable to register".into()))
-                }
+                    Err(ServerFnError::new("Unable to register"))
+                },
+                // todo: this probably  means I should split out errors based on what journey I'm oninstead of pushing them all into one enum
+                UserDbError::UsernameNotExists => unreachable!("User not exists error gotten on register flow")
             }
         }
     }
@@ -66,6 +68,9 @@ pub fn Register() -> impl IntoView {
                 </ul>
             }
         }>
+            // hack: this is just so the error boundary will actually trigger.
+            // I never want to display this. Replace this pattern with an error memo on the value maybe?
+            // this pattern is meant to support no JS/progressive flows; but it doesn't seem to work anyway
             <span style="display: none">{value}</span>
         </ErrorBoundary>
         <ActionForm action=submit_action>

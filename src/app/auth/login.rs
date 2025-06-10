@@ -1,70 +1,85 @@
 use crate::app::auth::Credentials;
-use leptos::ev::SubmitEvent;
-use leptos::form::FromFormData;
-use leptos::leptos_dom::log;
 use leptos::prelude::*;
 use leptos_router::components::A;
 
 
 #[server]
-pub async fn try_login(credentials: Credentials) -> Result<(), ServerFnError> {
+pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError> {
     use crate::app::auth::user::UserRow;
-    use axum::http::StatusCode;
-    use leptos::leptos_dom::log;
+    use axum::http::StatusCode;    
     use leptos::prelude::expect_context;
     use crate::contexts::use_pool;
+    use crate::app::auth::user::UserDbError;
 
     let pool = use_pool()
         .ok_or_else(|| ServerFnError::new("Server error"))?;
 
-    if UserRow::get_by_credentials(credentials, &pool).await.is_some() {
-        log!("try_login successful login");
-        // todo: add support for navigating back to an intended url pre login.
-        //  would have to have stored it in session during original auth check
-        // todo: set cookie
-        leptos_axum::redirect("/");
-
-        return Ok(())
+    match UserRow::get_by_credentials(credentials, &pool).await {
+        Ok(Some(u)) => {
+            println!("success? {u:?}");
+            // todo: add support for navigating back to an intended url pre login.
+            //  would have to have stored it in session during original auth check
+            // todo: set cookie
+            leptos_axum::redirect("/");
+            Ok("Ok".into())
+        }
+        Ok(None) => {
+            let opts = expect_context::<leptos_axum::ResponseOptions>();
+            opts.set_status(StatusCode::UNAUTHORIZED);
+            Err(ServerFnError::new("Invalid credentials"))
+        }
+        Err(e) => {
+            match e {
+                UserDbError::UsernameExists => {
+                    unreachable!("Username exists error when trying to login")
+                }
+                UserDbError::UsernameNotExists => {
+                    let opts = expect_context::<leptos_axum::ResponseOptions>();
+                    opts.set_status(StatusCode::UNAUTHORIZED);
+                    Err(ServerFnError::new("Invalid credentials"))
+                }
+                UserDbError::UnknownError => {
+                    Err(ServerFnError::new("System error"))
+                }
+            }
+        }
     }
-
-    log!("try_login failed login");
-    let opts = expect_context::<leptos_axum::ResponseOptions>();
-    opts.set_status(StatusCode::UNAUTHORIZED);
-    Err(ServerFnError::ServerError("Invalid credentials".into()))
 }
 
 #[component]
 pub fn Login() -> impl IntoView {
     let submit_action = ServerAction::<TryLogin>::new();
-    // todo: how to get this? want to respond to the error. Maybe this isn't possible client side with ActionForm?
-    //  https://docs.rs/reactive_graph/0.2.2/reactive_graph/actions/struct.Action.html
-    // let v = submit_action.value();
-    let validate = move |event: SubmitEvent| {
-        // this is kind of making the ActionForm action redundant; but if I don't manual dispatch I can't get the credentials to unwrap properly?
-        event.prevent_default();
-        let data = Credentials::from_event(&event);
-        log!("{:?}", data);
-        match data {
-            Ok(credentials) => {
-                if credentials.username.is_empty() || credentials.password.is_empty() {
-                    log!("Invalid data");
-                }
-                else {
-                    submit_action.dispatch(TryLogin::from(credentials));
-                }
-            }
-            Err(..) => {
-                // can check deserialisation errors here
-                log!("Error with data");
-                event.prevent_default();
-            }
-        }
-    };
+    let value = Signal::derive(move || {
+        submit_action
+            .value()
+            .get()
+            .unwrap_or_else(|| Ok("".into()))
+    });
+
     view! {
         <h2>"Login"</h2>
-        <ActionForm action=submit_action on:submit:capture=validate>
-            <label>"username"<input name="username" /></label>
-            <label>"password"<input name="password" type="password" /></label>
+        <ErrorBoundary fallback=move |errors| {
+            view! {
+                <p>Error</p>
+                <ul>
+                    {move || {
+                        errors
+                            .get()
+                            .into_iter()
+                            .map(|(_, e)| view! { <li>{e.to_string()}</li> })
+                            .collect::<Vec<_>>()
+                    }}
+                </ul>
+            }
+        }>
+            // hack: this is just so the error boundary will actually trigger.
+            // I never want to display this. Replace this pattern with an error memo on the value maybe?
+            // this pattern is meant to support no JS/progressive flows; but it doesn't seem to work anyway
+            <span style="display: none">{value}</span>
+        </ErrorBoundary>
+        <ActionForm action=submit_action>
+            <label>"username"<input name="credentials[username]" /></label>
+            <label>"password"<input name="credentials[password]" type="password" /></label>
             <button>Login</button>
             <A href="/register">Register</A>
         </ActionForm>
