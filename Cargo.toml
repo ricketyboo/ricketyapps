@@ -26,6 +26,10 @@ chrono = { version = "0.4", features = ["default", "serde"] }
 dotenvy = "0.15"
 secrecy = "0.10"
 
+argon2 = { version = "0.5", features = ["rand"], optional = true }
+# 0.9 is not compatible with argon salt
+rand = { version = "0.8", optional = true }
+
 [features]
 hydrate = [
     "leptos/hydrate",
@@ -33,6 +37,8 @@ hydrate = [
     "dep:wasm-bindgen",
 ]
 ssr = [
+    "dep:argon2",
+    "dep:rand",
     "dep:axum",
     "dep:tokio",
     "dep:leptos_axum",

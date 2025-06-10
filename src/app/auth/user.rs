@@ -1,6 +1,8 @@
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use super::{Credentials, User};
 use sqlx::{PgPool, query_as};
 use uuid::Uuid;
+use crate::app::auth::utils::hash_password;
 
 #[derive(sqlx::FromRow, Clone, Debug)]
 pub struct UserRow {
@@ -12,8 +14,8 @@ pub struct UserRow {
 
 impl UserRow {
     pub async fn create(credentials: Credentials, pool: &PgPool) -> Option<UserRow> {
-        // todo: hash_password
-        let password_hash = credentials.password;
+        // todo: error handling
+        let password_hash = hash_password(&credentials.password).await.unwrap();
 
         match query_as::<_, UserRow>("INSERT INTO users (username, password_hash) VALUES ( $1,  $2) returning *")
             .bind(credentials.username)
@@ -44,15 +46,21 @@ impl UserRow {
         }
     }
 
-    pub async fn get_by_credentials(credentials: Credentials, pool: &PgPool) -> Option<User> {
-        // todo: run the hash on the input password
-        let password_hash = credentials.password;
+    pub async fn get_by_credentials(credentials: Credentials, pool: &PgPool) -> Option<User> {        
         match Self::get_by_username(credentials.username, pool).await {
-            None => {None}
             Some(u) => {
-                if u.password_hash == password_hash {
+                let expected_hash = PasswordHash::new(&u.password_hash).expect("Unable to hash user passhash");
+                if Argon2::default().verify_password(credentials.password.as_bytes(), &expected_hash).is_ok() {
                     return Some(User::from(u))
                 }
+                None
+            }
+            None => {
+                // note: doing a check even with no user row returned to minimise timing differences 
+                // between not found and found user checks and avoid potential information leak 
+                // about existence of user existence
+                let password_hash = hash_password(&credentials.password).await.unwrap();
+                PasswordHash::new(&password_hash).expect("Unable to hash dummy passhash");
                 None
             }
         }
