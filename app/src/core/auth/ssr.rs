@@ -18,7 +18,7 @@ impl From<&UserRecord> for User {
     }
 }
 
-impl User {
+impl UserRecord {
     // pub fn get(id: Uuid, pool: &PgPool)->Self {
     //     query_as::<_,UserRecord>("SELECT * FROM users WHERE id = ?").bind(id).fetch_one(pool).await?
     // }
