@@ -1,43 +1,28 @@
 use leptos::prelude::*;
 
-use crate::core::auth::ssr::get_users;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+#[cfg(feature = "ssr")]
+mod ssr;
+
+#[server]
+pub async fn get_users() -> Result<Vec<User>, ServerFnError> {
+    use crate::ssr::AppState;
+    match with_context::<AppState, _>(|state| state.pool.clone())
+        .ok_or_else(|| ServerFnError::ServerError("Pool missing.".into())) {
+        Ok(pool) => {
+            let users = User::get_all(&pool).await;
+            let users_mapped = users.iter().map(User::from).collect();
+            Ok(users_mapped)
+        }, Err(e) => Err(e)
+    }
+}
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct User {
     id: Uuid,
     username: String,
-}
-
-pub mod ssr {
-    use crate::core::auth::User;
-    use leptos::prelude::ServerFnError;
-    use leptos::server;
-
-
-    #[server]
-    pub async fn get_users() -> Result<Vec<User>, ServerFnError> {
-        use uuid::Uuid;
-        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-        Ok(vec![
-            User {
-                id: Uuid::new_v4(),
-                username: "Boberta".into(),
-            },
-            User {
-                id: Uuid::new_v4(),
-                username: "Susandy".into(),
-            },
-        ])
-    }
-    
-    impl User {
-        fn hash_password(password: &str) -> Result<(), ()> {
-            todo!()
-        }
-    }
-
 }
 
 #[component]

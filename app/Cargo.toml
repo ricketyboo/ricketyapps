@@ -13,9 +13,12 @@ leptos_meta.workspace = true
 leptos_router.workspace = true
 
 uuid.workspace = true
+
 leptos_axum = { workspace = true, optional = true }
 sqlx = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
+secrecy = { workspace = true, optional = true }
 
 http.workspace = true
 cfg-if.workspace = true
@@ -26,5 +29,5 @@ serde = { version = "1.0.219", features = ["derive"] }
 [features]
 default = []
 hydrate = ["leptos/hydrate"]
-ssr = ["leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum", "dep:sqlx", "dep:tokio"]
+ssr = ["leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum", "dep:sqlx", "dep:tokio", "dep:axum", "dep:secrecy"]
 

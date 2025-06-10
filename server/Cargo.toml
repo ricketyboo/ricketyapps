@@ -9,6 +9,7 @@ edition = "2021"
 app = { workspace = true, features = ["ssr"] }
 leptos = { workspace = true, features = ["ssr"] }
 leptos_axum.workspace = true
+sqlx.workspace = true
 
 axum.workspace = true
 simple_logger.workspace = true
@@ -16,3 +17,4 @@ tokio.workspace = true
 tower.workspace = true
 tower-http.workspace = true
 log.workspace = true
+dotenvy = "0.15.7"

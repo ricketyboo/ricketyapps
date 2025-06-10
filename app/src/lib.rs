@@ -9,6 +9,8 @@ use leptos_router::{
 use views::PlacePage;
 
 mod core;
+#[cfg(feature = "ssr")]
+pub mod ssr;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
