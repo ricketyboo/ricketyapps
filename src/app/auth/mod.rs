@@ -2,6 +2,16 @@ use leptos::ev::SubmitEvent;
 use leptos::logging::log;
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[cfg(feature = "ssr")]
+mod ssr;
+
+pub struct User {
+    id: Uuid,
+    username: String,
+}
+
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Credentials {
@@ -11,12 +21,14 @@ pub struct Credentials {
 
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<(), ServerFnError> {
+    use crate::app::auth::ssr::UserRow;
     use axum::http::StatusCode;
+    use crate::db::get_pool;
+
+    // todo: move into main and pass via state/context
+    let pool = get_pool().await.ok().unwrap();
     
-    // todo: look up user
-    // todo: compare pw hash
-    
-    if credentials.password == "correct" {
+    if UserRow::get_by_credentials(credentials, &pool).await.is_some() {
         log!("try_login successful login");
         // todo: add support for navigating back to an intended url pre login.
         //  would have to have stored it in session during original auth check
@@ -33,7 +45,7 @@ pub async fn try_login(credentials: Credentials) -> Result<(), ServerFnError> {
 #[component]
 pub fn Login() -> impl IntoView {
     let submit_action = ServerAction::<TryLogin>::new();
-    // todo: how to get this? want to respond to the error. Maybe this isn't possible client side with ActionForm
+    // todo: how to get this? want to respond to the error. Maybe this isn't possible client side with ActionForm?
     //  https://docs.rs/reactive_graph/0.2.2/reactive_graph/actions/struct.Action.html
     // let v = submit_action.value();
     let validate = move |event: SubmitEvent| {
