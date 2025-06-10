@@ -6,7 +6,7 @@ use crate::app::auth::utils::hash_password;
 
 #[derive(sqlx::FromRow, Clone, Debug)]
 pub struct UserRow {
-    id: Uuid,
+    pub(crate) id: Uuid,
     username: String,
     // todo: SecretString
     password_hash: String,
