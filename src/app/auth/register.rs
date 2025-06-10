@@ -77,7 +77,8 @@ pub fn Register() -> impl IntoView {
             <label>"username"<input name="credentials[username]" /></label>
             <label>"password"<input name="credentials[password]" type="password" /></label>
             <button type="submit">Register</button>
-            <small>Already have an account? <A href="/login">Login</A></small>
+            <small>Already have an account? <A href="../login">Login</A></small>
+            <small>Go Home? <A href="/">Home</A></small>
         </ActionForm>
     }
 }

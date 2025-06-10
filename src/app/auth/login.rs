@@ -90,7 +90,8 @@ pub fn Login() -> impl IntoView {
             <label>"password"<input name="credentials[password]" type="password" /></label>
             <button>Login</button>
             // todo: wrap this with an app config check to determine if registration is available.
-            <small>"Don't have an account? "<A href="/register">"Register"</A></small>
+            <small>"Don't have an account? "<A href="../register">"Register"</A></small>
+            <small>Go Home? <A href="/">Home</A></small>
         </ActionForm>
     }
 }
