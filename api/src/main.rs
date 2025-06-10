@@ -3,16 +3,13 @@ use axum::extract::{Request, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post};
 use axum::{Json, Router, ServiceExt, debug_handler};
-use db::get_client;
+use db::{get_client, get_pool};
 use dotenvy::dotenv;
 
+use domains::places::api::routes as place_routes;
+use domains::users::api::routes as user_routes;
 use tower_http::normalize_path::NormalizePathLayer;
 use tower_layer::Layer;
-
-use domains::places::entity::{CreatePlaceDto, Place};
-
-use welds::prelude::VecStateExt;
-use welds::state::DbState;
 
 #[tokio::main]
 async fn main() {
@@ -28,12 +25,23 @@ async fn init() -> (AppConfig, AppState) {
 }
 
 async fn serve(app_config: AppConfig, app_state: AppState) {
-    let router = Router::new()
-        .route("/", get(get_places))
-        .route("/", post(post_places))
-        .with_state(app_state.clone());
-    let app = NormalizePathLayer::trim_trailing_slash().layer(router);
+    // let pool = get_pool().await.unwrap();
+    // let users = UserRepository::all(&pool).await;
+    // println!("Users {:?}", users);
 
+    let api_routes = Router::new()
+        .nest("/places", place_routes())
+        .nest("/users", user_routes());
+
+    let router = Router::new()
+        .nest("/api", api_routes)
+        .with_state(app_state.clone());
+    // let router = Router::new()
+    //     .route("/", get(get_places))
+    //     .route("/", post(post_places))
+    //     .with_state(app_state.clone());
+    let app = NormalizePathLayer::trim_trailing_slash().layer(router);
+    //
     let addr = app_config.addr();
     println!("Listening on {addr}");
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
@@ -42,20 +50,20 @@ async fn serve(app_config: AppConfig, app_state: AppState) {
         .unwrap();
 }
 
-async fn get_places(State(state): State<AppState>) -> (StatusCode, Json<Vec<Place>>) {
-    let places = Place::all().run(&state.client).await;
-    (StatusCode::OK, Json(places.unwrap().into_inners()))
-}
-
-#[debug_handler]
-async fn post_places(
-    State(state): State<AppState>,
-    Json(create): Json<CreatePlaceDto>,
-) -> (StatusCode, Json<Place>) {
-    let mut place = DbState::new_uncreated(Place {
-        id: 0,
-        name: create.name,
-    });
-    place.save(&state.client).await.expect("oh no save failure");
-    (StatusCode::OK, Json(place.into_inner()))
-}
+// async fn get_places(State(state): State<AppState>) -> (StatusCode, Json<Vec<Place>>) {
+//     let places = Place::all().run(&state.client).await;
+//     (StatusCode::OK, Json(places.unwrap().into_inners()))
+// }
+//
+// #[debug_handler]
+// async fn post_places(
+//     State(state): State<AppState>,
+//     Json(create): Json<CreatePlaceDto>,
+// ) -> (StatusCode, Json<Place>) {
+//     let mut place = DbState::new_uncreated(Place {
+//         id: 0,
+//         name: create.name,
+//     });
+//     place.save(&state.client).await.expect("oh no save failure");
+//     (StatusCode::OK, Json(place.into_inner()))
+// }

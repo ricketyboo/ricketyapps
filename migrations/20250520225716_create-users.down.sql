@@ -1,2 +1,2 @@
 -- Add down migration script here
-DROP TABLE places;
+DROP TABLE users;

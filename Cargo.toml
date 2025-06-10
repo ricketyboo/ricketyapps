@@ -6,10 +6,22 @@ members = ['api', "lib/*", "domains"]
 app = { path = "lib/app" }
 db = { path = "lib/db" }
 domains = { path = "domains" }
-sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-native-tls"] }
-tokio = "1.45.0"
+
 dotenvy = "0.15"
-secrecy = "0.10"
-serde = { version = "1", features = ["derive"] }
+
+axum = { version = "0.8", features = ["default", "macros"] }
+tokio = "1.45.0"
+
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-native-tls", "uuid", "chrono"] }
 welds = { version = "0.4", features = ["postgres", "migrations"] }
+
+serde = { version = "1", features = ["derive"] }
 utility-types = "*"
+uuid = { version = "1.16.0", features = ["v4", "serde"] }
+secrecy = { version = "0.10", features = ["serde"] }
+chrono = { version = "0.4", features = ["default", "serde"] }
+
+
+
+
+

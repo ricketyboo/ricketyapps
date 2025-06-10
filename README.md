@@ -57,3 +57,15 @@ DATABASE_URL=postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB
 podman start postgres
 podman logs postgres
 ```
+
+---
+
+Domain Folders
+
+- Contain entities
+- Contain DB migrations for each domain
+
+Todo
+
+- Decide on how to run migrations that are co-dependent
+    - knowing that if they're coupled, what's the point of isolating them

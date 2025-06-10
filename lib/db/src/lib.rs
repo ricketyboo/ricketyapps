@@ -1,4 +1,6 @@
 use secrecy::{ExposeSecret, SecretString};
+use sqlx::PgPool;
+use sqlx::postgres::PgPoolOptions;
 use std::env;
 use welds::connections::any::AnyClient;
 
@@ -37,6 +39,14 @@ impl DatabaseConfiguration {
             self.name,
         )
     }
+}
+
+pub async fn get_pool() -> Result<PgPool, sqlx::Error> {
+    let db_config = DatabaseConfiguration::from_env();
+    PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&db_config.connection_string())
+        .await
 }
 
 pub async fn get_client() -> AnyClient {

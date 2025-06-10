@@ -14,6 +14,6 @@ sqlx.workspace = true
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 welds.workspace = true
 # local deps
-axum = { version = "0.8", features = ["default", "macros"] }
+axum.workspace = true
 tower-http = { version = "0.6", features = ["normalize-path", 'cors', 'fs'] }
 tower-layer = "0.3"

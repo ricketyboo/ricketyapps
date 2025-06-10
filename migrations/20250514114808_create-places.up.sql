@@ -1,6 +1,6 @@
 -- Add up migration script here
-CREATE TABLE IF NOT EXISTS places
+CREATE TABLE places
 (
-    id   SERIAL PRIMARY KEY,
+    id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR NOT NULL
 )
