@@ -1,8 +1,6 @@
-
 use crate::app::auth::{Credentials, User};
 use leptos::prelude::*;
 use leptos_router::components::A;
-
 
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError> {
@@ -30,6 +28,7 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
             //  would have to have stored it in session during original auth check
 
             leptos_axum::redirect("/");
+            // todo: don't use string value here, it's just a hack to deal with error boundaries in the UI
             Ok("Ok".into())
         }
         Ok(None) => {
