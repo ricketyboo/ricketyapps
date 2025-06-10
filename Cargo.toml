@@ -6,3 +6,4 @@ members = ['api', "lib/*"]
 sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-native-tls"] }
 tokio = "1.45.0"
 dotenvy = "0.15"
+secrecy = "0.10"
