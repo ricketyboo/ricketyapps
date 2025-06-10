@@ -8,7 +8,7 @@ use leptos_router::{
     path,
 };
 use leptos_router::hooks::{use_navigate, use_url};
-use crate::app::auth::views::Login;
+use crate::app::auth::views::{Login, Register};
 
 pub mod auth;
 
@@ -34,10 +34,11 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 
 #[server]
 async fn check_auth() -> Result<bool, ServerFnError>{
-    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+
+    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;    
+    Ok(rand::random())
     // Ok(true)
-    // leptos_axum::redirect("/login");
-    Ok(false)
+    // Ok(false)
     // Err(ServerFnError::new("go away"))
 }
 
@@ -45,12 +46,6 @@ async fn check_auth() -> Result<bool, ServerFnError>{
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
-
-    // todo: read from auth session
-    let (logged_in, set_logged_in) = signal(true);
-    
-    
-    
 
     view! {
         // injects a stylesheet into the document <head>
@@ -68,9 +63,6 @@ pub fn App() -> impl IntoView {
                     <ParentRoute
                         path=path!("")
                         view=move || {
-                            // having to do this here otherwise we get errors about not being in a router context.
-                            // todo: see if I can move this whole chunk of madness into an AuthenticatedRoute
-
                             let url = use_url();
                             let auth = Resource::new(url, move |_| check_auth());
                             Effect::new(move |_| {
@@ -85,8 +77,8 @@ pub fn App() -> impl IntoView {
                                 }
                             });
                             view! {
-                                <Suspense fallback=|| {
-                                    view! { <p>"Loading \"/protected\"..."</p> }
+                                <Transition fallback=|| {
+                                    view! { <p>"Checking auth..."</p> }
                                 }>
                                     <Show when=move || {
                                         auth.get()
@@ -108,22 +100,19 @@ pub fn App() -> impl IntoView {
                                             </p>
                                         </div>
                                     </Show>
-                                </Suspense>
+                                </Transition>
                             }
                         }
                     >
                         <Route path=path!("") view=HomePage />
                         <Route path=path!("places") view=PlacePage />
                     </ParentRoute>
+                    // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model
+                    // <AuthRoutes logged_in />
                     <Route path=path!("login") view=Login />
-
-                // <AuthRoutes logged_in />
+                    <Route path=path!("register") view=Register />
                 </Routes>
             </main>
-            // todo: trigger auth clear
-            <button on:click=move |_| {
-                set_logged_in.update(|n| *n = !*n)
-            }>{move || if logged_in.get() { "Log Out" } else { "Log In" }}</button>
         </Router>
     }
 }
