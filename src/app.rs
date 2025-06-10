@@ -1,4 +1,3 @@
-use crate::app::auth::{Login, Register};
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::components::A;
@@ -6,6 +5,7 @@ use leptos_router::{
     components::{Route, Router, Routes},
     StaticSegment,
 };
+use crate::app::auth::views::{Login, Register};
 
 mod auth;
 
