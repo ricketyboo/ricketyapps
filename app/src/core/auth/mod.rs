@@ -14,21 +14,23 @@ pub mod ssr {
     use crate::core::auth::User;
     use leptos::prelude::ServerFnError;
     use leptos::server;
+    use uuid::Uuid;
 
     #[server]
     pub async fn get_users() -> Result<Vec<User>, ServerFnError> {
         tokio::time::sleep(std::time::Duration::from_secs(3)).await;
         Ok(vec![
             User {
-                id: uuid::Uuid::new_v4(),
+                id: Uuid::new_v4(),
                 username: "Bobert".into(),
             },
             User {
-                id: uuid::Uuid::new_v4(),
+                id: Uuid::new_v4(),
                 username: "Susandy".into(),
             },
         ])
     }
+
 }
 
 #[component]
