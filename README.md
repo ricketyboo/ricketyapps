@@ -1,5 +1,11 @@
 ## Initial dev environment setup
 
+Install tooling
+
+```shell
+cargo install sqlx-cli
+```
+
 ```shell
 podman pull postgres
 podman run -d --name postgres --env POSTGRES_USER=postgres --env POSTGRES_PASSWORD=password  -p 5432:5432 -v pg-data:/var/lib/postgresql/data postgres
