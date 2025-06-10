@@ -1,4 +1,63 @@
+/*
+	Based on https://github.com/leptos-rs/start-trunk/blob/main/public/styles.scss
+*/
+/* --------------------- Open Props --------------------------- */
+
+/* the props */
+@import "https://unpkg.com/open-props";
+
+/* optional imports that use the props */
+@import "https://unpkg.com/open-props/normalize.min.css";
+@import "https://unpkg.com/open-props/buttons.min.css";
+
+/* ------------------------------------------------------------ */
+
 body {
 	font-family: sans-serif;
 	text-align: center;
+}
+
+.container {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.buttons {
+	display: flex;
+	justify-content: space-evenly;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	text-align: center;
+	margin: 0 auto;
+	padding: 2rem;
+}
+
+button {
+	margin: var(--size-6);
+}
+
+button {
+	display: block;
+	text-align: center;
+	margin: 2rem auto;
+}
+
+#main-nav {
+	display: flex;
+	a {
+		padding: 1rem;
+	}
+}
+
+form label {
+	display: block;
+	margin-bottom: 1rem;
 }

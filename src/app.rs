@@ -1,9 +1,13 @@
+use crate::app::auth::Login;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
+use leptos_router::components::A;
 use leptos_router::{
     components::{Route, Router, Routes},
     StaticSegment,
 };
+
+mod auth;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -39,8 +43,14 @@ pub fn App() -> impl IntoView {
         // content for this welcome page
         <Router>
             <main>
+                // todo: proper aria labels and structure
+                <nav id="main-nav">
+                    <A href="login">"Login"</A>
+                    <A href="/">"Home"</A>
+                </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=HomePage />
+                    <Route path=StaticSegment("/login") view=Login />
                 </Routes>
             </main>
         </Router>
