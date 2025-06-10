@@ -2,6 +2,8 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().expect(".env file not found");
+
     use axum::Router;
     use leptos::logging::log;
     use leptos::prelude::*;
