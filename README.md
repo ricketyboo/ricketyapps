@@ -4,6 +4,7 @@ Install tooling
 
 ```shell
 cargo install sqlx-cli
+cargo install --locked cargo-leptos
 ```
 
 ```shell
