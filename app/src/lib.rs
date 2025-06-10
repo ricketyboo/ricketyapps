@@ -1,11 +1,11 @@
+use crate::core::auth::UserView;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
+use leptos_router::components::A;
 use leptos_router::{
     components::{Route, Router, Routes},
     StaticSegment,
 };
-
-use crate::core::auth::UserView;
 use views::PlacePage;
 
 mod core;
@@ -43,9 +43,9 @@ pub fn App() -> impl IntoView {
         <Router>
             <main>
                 <nav>
-                    <a href="/">Home</a>
-                    <a href="/places">places</a>
-                    <a href="/users">users</a>
+                    <A href="/">Home</A>
+                    <A href="/places">places</A>
+                    <A href="/users">users</A>
                 </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=HomePage />
