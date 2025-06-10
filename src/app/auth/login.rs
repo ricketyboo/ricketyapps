@@ -5,16 +5,17 @@ use leptos::leptos_dom::log;
 use leptos::prelude::*;
 use leptos_router::components::A;
 
+
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<(), ServerFnError> {
     use crate::app::auth::user::UserRow;
     use axum::http::StatusCode;
     use leptos::leptos_dom::log;
     use leptos::prelude::expect_context;
-    use crate::db::get_pool;
+    use crate::contexts::use_pool;
 
-    // todo: move into main and pass via state/context
-    let pool = get_pool().await.ok().unwrap();
+    let pool = use_pool()
+        .ok_or_else(|| ServerFnError::new("Server error"))?;
 
     if UserRow::get_by_credentials(credentials, &pool).await.is_some() {
         log!("try_login successful login");
