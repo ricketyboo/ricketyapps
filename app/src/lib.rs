@@ -4,6 +4,8 @@ use leptos_router::{
     components::{Route, Router, Routes},
     StaticSegment,
 };
+
+
 use views::PlacePage;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
@@ -33,7 +35,7 @@ pub fn App() -> impl IntoView {
         <Stylesheet id="leptos" href="/pkg/planner.css" />
 
         // sets the document title
-        <Title text="Welcome to Leptos" />
+        <Title text="Welcome to Planner" />
 
         // content for this welcome page
         <Router>

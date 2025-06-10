@@ -28,3 +28,4 @@ link to contacts. Link to trips. Link to journal.
 
 wishlist
 -  integrate into actual budget.
+
