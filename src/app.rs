@@ -1,10 +1,10 @@
 use crate::app::auth::views::{Login, Register};
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
-use leptos_router::components::{ProtectedRoute, A};
+use leptos_router::components::{Outlet, ParentRoute, ProtectedRoute, A};
 use leptos_router::{
-    components::{Route, Router, Routes},
-    path, StaticSegment,
+    components::{Router, Routes},
+    path, MatchNestedRoutes,
 };
 
 pub mod auth;
@@ -64,23 +64,48 @@ pub fn App() -> impl IntoView {
                         condition=move || Some(logged_in.get())
                         redirect_path=|| "/login"
                         view=HomePage
-                    />
-                    <ProtectedRoute
-                        path=path!("login")
-                        condition=move || Some(!logged_in.get())
-                        redirect_path=|| "/"
-                        view=Login
-                    />
-                    <ProtectedRoute
-                        path=path!("register")
-                        condition=move || Some(!logged_in.get())
-                        redirect_path=|| "/"
-                        view=Register
-                    />
+                    />                    
+                    <AuthRoutes logged_in=logged_in />
                 </Routes>
             </main>
         </Router>
     }
+}
+
+#[component(transparent)]
+fn AuthRoutes(logged_in: ReadSignal<bool>) -> impl MatchNestedRoutes + Clone {
+    view! {
+        <ParentRoute
+            path=path!("")
+            view=|| {
+                view! {
+                    <div style="border: 1px solid #f00">
+                        <p>
+                            <small>"auth layout"</small>
+                        </p>
+                        <Outlet />
+                        <p>
+                            <small>"end auth layout"</small>
+                        </p>
+                    </div>
+                }
+            }
+        >
+            <ProtectedRoute
+                path=path!("login")
+                condition=move || Some(!logged_in.get())
+                redirect_path=|| "/"
+                view=Login
+            />
+            <ProtectedRoute
+                path=path!("register")
+                condition=move || Some(!logged_in.get())
+                redirect_path=|| "/"
+                view=Register
+            />
+        </ParentRoute>
+    }
+    .into_inner()
 }
 
 /// Renders the home page of your application.
