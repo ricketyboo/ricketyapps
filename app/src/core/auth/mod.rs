@@ -1,47 +1,53 @@
 use leptos::prelude::*;
-use leptos::task::spawn_local;
 
-use uuid::Uuid;
+use crate::core::auth::ssr::get_users;
 use serde::{Deserialize, Serialize};
-use crate::core::auth::ssr::{get_user};
+use uuid::Uuid;
 
-#[derive(Clone, Serialize,Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct User {
     id: Uuid,
     username: String,
 }
 
+
 pub mod ssr {
+    use crate::core::auth::User;
     use leptos::prelude::ServerFnError;
     use leptos::server;
-    use crate::core::auth::User;
 
     #[server]
-    pub async fn get_user() -> Result<User, ServerFnError> {
-        Ok(User {
-            id: uuid::Uuid::new_v4(),
-            username: "Bobert".into(),
-        })
+    pub async fn get_users() -> Result<Vec<User>, ServerFnError> {
+        Ok(vec![
+            User {
+                id: uuid::Uuid::new_v4(),
+                username: "Bobert".into(),
+            },
+            User {
+                id: uuid::Uuid::new_v4(),
+                username: "Susandy".into(),
+            },
+        ])
     }
 }
 
-
 #[component]
 pub fn UserView() -> impl IntoView {
-    let (user, set_user) = signal(User {
-        id: Uuid::default(),
-        username: "".into()
-    });
+    let users_resource = Resource::new_blocking(move || "", |_| get_users());
 
     view! {
-        <p>User</p>
-        <button on:click=move |_| {
-            spawn_local(async move {
-                let u = get_user().await.expect("oh no");
-                set_user.set(u);
-            })
-        }>GetUser</button>
-        <p>{move || user.get().id.to_string()}</p>
-        <p>{move || user.get().username}</p>
+        <Suspense fallback=|| ()>
+            {move || Suspend::new(async move {
+                let users = users_resource.await;
+                view! {
+                    <For each=move || users.clone().unwrap_or_default() key=|u| u.id let(user)>
+                        <div>
+                            <p>{move || user.id.to_string()}</p>
+                            <p>{move || user.username.to_string()}</p>
+                        </div>
+                    </For>
+                }
+            })}
+        </Suspense>
     }
 }
