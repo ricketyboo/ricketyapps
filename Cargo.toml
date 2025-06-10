@@ -3,6 +3,7 @@ resolver = "2"
 members = ['api', "lib/*"]
 
 [workspace.dependencies]
+app = { path = "lib/app" }
 db = { path = "lib/db" }
 models = { path = "lib/models" }
 sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-native-tls"] }

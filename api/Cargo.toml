@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 # repo deps
+app.workspace = true
 db.workspace = true
 models.workspace = true
 # shared deps
