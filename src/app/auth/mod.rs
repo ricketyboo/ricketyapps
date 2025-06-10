@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+
 use uuid::Uuid;
 
 mod login;
@@ -7,6 +8,8 @@ mod register;
 mod user;
 #[cfg(feature = "ssr")]
 mod utils;
+
+
 
 pub mod views {
     pub use super::login::Login;

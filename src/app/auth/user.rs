@@ -1,8 +1,10 @@
-use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use super::{Credentials, User};
-use sqlx::{PgPool, query_as};
-use uuid::Uuid;
 use crate::app::auth::utils::hash_password;
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
+use sqlx::{query_as, PgPool};
+use uuid::Uuid;
+
+use thiserror::Error;
 
 #[derive(sqlx::FromRow, Clone, Debug)]
 pub struct UserRow {
@@ -12,9 +14,30 @@ pub struct UserRow {
     password_hash: String,
 }
 
+#[derive(Error, Debug)]
+pub enum UserDbError {
+    #[error("Username is taken")]
+    UserExists,
+    #[error("System error")]
+    UnknownError,
+}
+
+
 impl UserRow {
-    pub async fn create(credentials: Credentials, pool: &PgPool) -> Option<UserRow> {
-        // todo: error handling
+    pub async fn create(credentials: Credentials, pool: &PgPool) -> Result<UserRow, UserDbError> {
+        // todo: validations
+        
+        let username_taken: bool = sqlx::query_scalar(
+            "SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)"
+        ).bind(credentials.username.clone()).fetch_one(pool).await.map_err(|e1| {
+            println!("Error: {e1:?}");
+            UserDbError::UnknownError
+        })?;
+
+        if username_taken {
+            return Err(UserDbError::UserExists)
+        };
+
         let password_hash = hash_password(&credentials.password).await.unwrap();
 
         match query_as::<_, UserRow>("INSERT INTO users (username, password_hash) VALUES ( $1,  $2) returning *")
@@ -24,10 +47,10 @@ impl UserRow {
             .await {
             Err(e) => {
                 println!("{e}");
-                None
+                Err(UserDbError::UnknownError)
             },
             Ok(u) => {
-                Some(u)
+                Ok(u)
             }
         }
     }

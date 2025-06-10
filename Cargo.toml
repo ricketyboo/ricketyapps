@@ -30,6 +30,8 @@ argon2 = { version = "0.5", features = ["rand"], optional = true }
 # 0.9 is not compatible with argon salt
 rand = { version = "0.8", optional = true }
 
+thiserror = "2.0"
+
 [features]
 hydrate = [
     "leptos/hydrate",

@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use crate::app::auth::{Credentials};
+use super::{Credentials};
 
 #[server]
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
@@ -7,19 +7,33 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
     use axum::http::StatusCode;
     use leptos::prelude::expect_context;
     use crate::db::get_pool;
+    use super::user::UserDbError;
 
     // todo: move into main and pass via state/context
     let pool = get_pool().await.ok().unwrap();
     let opts = expect_context::<leptos_axum::ResponseOptions>();
-    if let Some(user_row) = UserRow::create(credentials, &pool).await {
-        opts.set_status(StatusCode::CREATED);
-        // todo: initialise session
-        leptos_axum::redirect("/login");
-        // return Ok(User::from(user_row))
-        return Ok(user_row.id.to_string());
+
+    match UserRow::create(credentials, &pool).await {
+        Ok(user_row) => {
+            opts.set_status(StatusCode::CREATED);
+            // todo: initialise session
+            leptos_axum::redirect("/login");
+            // return Ok(User::from(user_row))
+            Ok(user_row.id.to_string())
+        }
+        Err(e) => {
+            match e {
+                UserDbError::UserExists => {
+                    opts.set_status(StatusCode::CONFLICT);
+                    Err(ServerFnError::ServerError(e.to_string()))
+                },
+                UserDbError::UnknownError => {
+                    opts.set_status(StatusCode::BAD_REQUEST);
+                    Err(ServerFnError::ServerError("Unable to register".into()))
+                }
+            }
+        }
     }
-    opts.set_status(StatusCode::BAD_REQUEST);
-    Err(ServerFnError::ServerError("Unable to register".into()))
 }
 
 #[server]
@@ -44,10 +58,7 @@ pub fn Register() -> impl IntoView {
             .get()
             .unwrap_or_else(|| Ok(String::new()))
     });
-
-    // Effect::new_isomorphic(move |_| {
-    //     log!("Got value = {:?}", value.get());
-    // });
+    
     view! {
         <h2>"Register"</h2>
         <ErrorBoundary fallback=move |errors| {
