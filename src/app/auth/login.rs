@@ -56,9 +56,9 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
 
 #[component]
 pub fn Login() -> impl IntoView {
-    let submit_action = ServerAction::<TryLogin>::new();
+    let action = ServerAction::<TryLogin>::new();
     let value = Signal::derive(move || {
-        submit_action
+        action
             .value()
             .get()
             .unwrap_or_else(|| Ok("".into()))
@@ -85,7 +85,7 @@ pub fn Login() -> impl IntoView {
             // this pattern is meant to support no JS/progressive flows; but it doesn't seem to work anyway
             <span style="display: none">{value}</span>
         </ErrorBoundary>
-        <ActionForm action=submit_action>
+        <ActionForm action>
             <label>"username"<input name="credentials[username]" /></label>
             <label>"password"<input name="credentials[password]" type="password" /></label>
             <button>Login</button>

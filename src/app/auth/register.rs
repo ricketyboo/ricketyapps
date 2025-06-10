@@ -43,9 +43,9 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
 
 #[component]
 pub fn Register() -> impl IntoView {
-    let submit_action = ServerAction::<TryRegister>::new();
+    let action = ServerAction::<TryRegister>::new();
     let value = Signal::derive(move || {
-        submit_action
+        action
             .value()
             .get()
             .unwrap_or_else(|| Ok(String::new()))
@@ -73,7 +73,7 @@ pub fn Register() -> impl IntoView {
             // this pattern is meant to support no JS/progressive flows; but it doesn't seem to work anyway
             <span style="display: none">{value}</span>
         </ErrorBoundary>
-        <ActionForm action=submit_action>
+        <ActionForm action>
             <label>"username"<input name="credentials[username]" /></label>
             <label>"password"<input name="credentials[password]" type="password" /></label>
             <button type="submit">Register</button>

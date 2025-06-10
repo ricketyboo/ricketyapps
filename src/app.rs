@@ -76,7 +76,7 @@ pub fn App() -> impl IntoView {
                         <Route path=path!("") view=HomePage />
                         <Route path=path!("places") view=PlacePage />
                     </ProtectedParentRoute>
-                    <AuthRoutes logged_in=logged_in />
+                    <AuthRoutes logged_in />
                 </Routes>
             </main>
             // todo: trigger auth clear
