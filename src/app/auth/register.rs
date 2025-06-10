@@ -39,19 +39,6 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
     }
 }
 
-#[server]
-async fn do_something(
-    should_error: Option<String>,
-) -> Result<String, ServerFnError> {
-    if should_error.is_none() {
-        Ok(String::from("Successful submit"))
-    } else {
-        Err(ServerFnError::ServerError(String::from(
-            "You got an error!",
-        )))
-    }
-}
-
 #[component]
 pub fn Register() -> impl IntoView {
     let submit_action = ServerAction::<TryRegister>::new();
