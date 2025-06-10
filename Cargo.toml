@@ -9,6 +9,7 @@ lto = true
 opt-level = 'z'
 
 [workspace.dependencies]
+app = { path = "app", default-features = false }
 app_helpers = { path = "lib/core/app_helpers" }
 db = { path = "lib/core/db" }
 domains = { path = "domains" }
