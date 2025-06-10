@@ -1,11 +1,14 @@
-use crate::app::auth::AuthRoutes;
+
 use leptos::prelude::*;
+
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
-use leptos_router::components::{Outlet, ProtectedParentRoute, Route, A};
+use leptos_router::components::{Outlet, ParentRoute,  Redirect, Route, A};
 use leptos_router::{
     components::{Router, Routes},
     path,
 };
+use leptos_router::hooks::{use_navigate, use_url};
+use crate::app::auth::views::Login;
 
 pub mod auth;
 
@@ -29,6 +32,15 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
     }
 }
 
+#[server]
+async fn check_auth() -> Result<bool, ServerFnError>{
+    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+    // Ok(true)
+    // leptos_axum::redirect("/login");
+    Ok(false)
+    // Err(ServerFnError::new("go away"))
+}
+
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
@@ -36,6 +48,9 @@ pub fn App() -> impl IntoView {
 
     // todo: read from auth session
     let (logged_in, set_logged_in) = signal(true);
+    
+    
+    
 
     view! {
         // injects a stylesheet into the document <head>
@@ -49,34 +64,60 @@ pub fn App() -> impl IntoView {
         <Router>
             <main>
                 // todo: proper aria labels and structure
-
                 <Routes fallback=|| "Page not found.".into_view()>
-                    <ProtectedParentRoute
+                    <ParentRoute
                         path=path!("")
-                        condition=move || Some(logged_in.get())
-                        redirect_path=|| "/login"
-                        view=|| {
+                        view=move || {
+                            // having to do this here otherwise we get errors about not being in a router context.
+                            // todo: see if I can move this whole chunk of madness into an AuthenticatedRoute
+
+                            let url = use_url();
+                            let auth = Resource::new(url, move |_| check_auth());
+                            Effect::new(move |_| {
+                                let is_logged_in = auth
+                                    .get()
+                                    .is_some_and(|res| {
+                                        res.is_ok_and(|is_logged_in| is_logged_in)
+                                    });
+                                if !is_logged_in {
+                                    let navigate = use_navigate();
+                                    navigate("/login", Default::default());
+                                }
+                            });
                             view! {
-                                <div id="app-layout" class="root-layout" style="">
-                                    <p>
-                                        <small>"app layout"</small>
-                                    </p>
-                                    <nav id="main-nav">
-                                        <A href="/">"Home"</A>
-                                        <A href="/places">"Places"</A>
-                                    </nav>
-                                    <Outlet />
-                                    <p>
-                                        <small>"end app layout"</small>
-                                    </p>
-                                </div>
+                                <Suspense fallback=|| {
+                                    view! { <p>"Loading \"/protected\"..."</p> }
+                                }>
+                                    <Show when=move || {
+                                        auth.get()
+                                            .is_some_and(|res| {
+                                                res.is_ok_and(|is_logged_in| is_logged_in)
+                                            })
+                                    }>
+                                        <div id="app-layout" class="root-layout" style="">
+                                            <p>
+                                                <small>"app layout"</small>
+                                            </p>
+                                            <nav id="main-nav">
+                                                <A href="/">"Home"</A>
+                                                <A href="/places">"Places"</A>
+                                            </nav>
+                                            <Outlet />
+                                            <p>
+                                                <small>"end app layout"</small>
+                                            </p>
+                                        </div>
+                                    </Show>
+                                </Suspense>
                             }
                         }
                     >
                         <Route path=path!("") view=HomePage />
                         <Route path=path!("places") view=PlacePage />
-                    </ProtectedParentRoute>
-                    <AuthRoutes logged_in />
+                    </ParentRoute>
+                    <Route path=path!("login") view=Login />
+
+                // <AuthRoutes logged_in />
                 </Routes>
             </main>
             // todo: trigger auth clear

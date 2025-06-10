@@ -14,6 +14,11 @@ mod user;
 #[cfg(feature = "ssr")]
 mod utils;
 
+pub mod views {
+    pub use super::login::Login;
+    pub use super::register::Register;
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct User {
     pub id: Uuid,
