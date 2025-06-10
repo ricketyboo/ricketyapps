@@ -1,3 +1,4 @@
+use crate::app::auth::AuthRoutes;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::components::{ProtectedRoute, A};
@@ -5,7 +6,6 @@ use leptos_router::{
     components::{Router, Routes},
     path,
 };
-use crate::app::auth::AuthRoutes;
 
 pub mod auth;
 
@@ -52,6 +52,7 @@ pub fn App() -> impl IntoView {
                 <nav id="main-nav">
                     <Show when=move || logged_in()>
                         <A href="/">"Home"</A>
+                        <A href="/places">"Places"</A>
                     </Show>
                     // todo: trigger auth clear
                     <button on:click=move |_| {
@@ -64,15 +65,19 @@ pub fn App() -> impl IntoView {
                         condition=move || Some(logged_in.get())
                         redirect_path=|| "/login"
                         view=HomePage
-                    />                    
+                    />
+                    <ProtectedRoute
+                        path=path!("places")
+                        condition=move || Some(logged_in.get())
+                        redirect_path=|| "/login"
+                        view=PlacePage
+                    />
                     <AuthRoutes logged_in=logged_in />
                 </Routes>
             </main>
         </Router>
     }
 }
-
-
 
 /// Renders the home page of your application.
 #[component]
@@ -84,5 +89,13 @@ fn HomePage() -> impl IntoView {
     view! {
         <h1>"Welcome to Leptos!"</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
+    }
+}
+
+#[component]
+fn PlacePage() -> impl IntoView {
+    view! {
+        <h1>"Places!"</h1>
+        <p>Todo</p>
     }
 }
