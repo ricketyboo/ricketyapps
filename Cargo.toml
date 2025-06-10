@@ -24,9 +24,9 @@ secrecy = { version = "0.10", features = ["serde"] }
 chrono = { version = "0.4", features = ["default", "serde"] }
 
 #leptos + axum deps
-leptos = { version = "0.8" }
+leptos = { version = "0.8", features = ["nightly"] }
 leptos_meta = { version = "0.8" }
-leptos_router = { version = "0.8" }
+leptos_router = { version = "0.8", features = ["nightly"]  }
 leptos_axum = { version = "0.8" }
 
 axum = { version = "0.8", features = ["default", "macros"] }

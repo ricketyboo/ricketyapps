@@ -33,17 +33,20 @@ pub mod ssr {
 
 #[component]
 pub fn UserView() -> impl IntoView {
-    let users_resource = Resource::new_blocking(move || "", |_| get_users());
+    let users_resource = OnceResource::new_blocking(get_users());
 
     view! {
         <Suspense fallback=|| ()>
             {move || Suspend::new(async move {
-                let users = users_resource.await;
+                let users = match users_resource.await {
+                    Ok(u) => u,
+                    Err(_) => panic!("Shit's fucked"),
+                };
                 view! {
-                    <For each=move || users.clone().unwrap_or_default() key=|u| u.id let(user)>
+                    <For each=move || users.clone() key=|u| u.id let(user)>
                         <div>
-                            <p>{move || user.id.to_string()}</p>
-                            <p>{move || user.username.to_string()}</p>
+                            <p>{user.id.to_string()}</p>
+                            <p>{user.username.to_string()}</p>
                         </div>
                     </For>
                 }
