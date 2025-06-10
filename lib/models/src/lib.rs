@@ -1,3 +1,7 @@
+use serde::Serialize;
+
+#[derive(Serialize)]
 pub struct Place {
-    name: String,
+    pub id: i32,
+    pub name: String,
 }
