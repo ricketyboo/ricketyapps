@@ -19,7 +19,7 @@ welds = { version = "0.4", features = ["postgres", "migrations"] }
 
 serde = { version = "1", features = ["derive"] }
 utility-types = "*"
-uuid = { version = "1.16.0", features = ["v4", "serde"] }
+uuid = { version = "1.16.0", features = ["v4", "serde", "js"] }
 secrecy = { version = "0.10", features = ["serde"] }
 chrono = { version = "0.4", features = ["default", "serde"] }
 

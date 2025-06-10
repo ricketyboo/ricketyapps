@@ -5,8 +5,10 @@ use leptos_router::{
     StaticSegment,
 };
 
-
+use crate::core::auth::UserView;
 use views::PlacePage;
+
+mod core;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -43,10 +45,12 @@ pub fn App() -> impl IntoView {
                 <nav>
                     <a href="/">Home</a>
                     <a href="/places">places</a>
+                    <a href="/users">users</a>
                 </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=HomePage />
                     <Route path=StaticSegment("/places") view=PlacePage />
+                    <Route path=StaticSegment("/users") view=UserView />
                 </Routes>
             </main>
         </Router>

@@ -11,14 +11,18 @@ views.workspace = true
 leptos.workspace = true
 leptos_meta.workspace = true
 leptos_router.workspace = true
+
+uuid.workspace = true
 leptos_axum = { workspace = true, optional = true }
+sqlx = { workspace = true, optional = true }
 
 http.workspace = true
 cfg-if.workspace = true
 thiserror.workspace = true
+serde = { version = "1.0.219", features = ["derive"] }
 
 [features]
 default = []
 hydrate = ["leptos/hydrate"]
-ssr = ["leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum"]
+ssr = ["leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum", "dep:sqlx"]
 
