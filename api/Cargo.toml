@@ -7,7 +7,7 @@ edition = "2024"
 # repo deps
 app.workspace = true
 db.workspace = true
-models.workspace = true
+domains.workspace = true
 # shared deps
 dotenvy.workspace = true
 sqlx.workspace = true

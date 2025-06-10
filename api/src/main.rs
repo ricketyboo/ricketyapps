@@ -5,9 +5,11 @@ use axum::routing::{get, post};
 use axum::{Json, Router, ServiceExt, debug_handler};
 use db::get_client;
 use dotenvy::dotenv;
-use models::{CreatePlaceDto, Place};
+
 use tower_http::normalize_path::NormalizePathLayer;
 use tower_layer::Layer;
+
+use domains::places::entity::{CreatePlaceDto, Place};
 
 use welds::prelude::VecStateExt;
 use welds::state::DbState;

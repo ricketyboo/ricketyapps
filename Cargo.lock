@@ -36,8 +36,8 @@ dependencies = [
  "app",
  "axum",
  "db",
+ "domains",
  "dotenvy",
- "models",
  "sqlx",
  "tokio",
  "tower-http",
@@ -373,6 +373,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.101",
+]
+
+[[package]]
+name = "domains"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "utility-types",
+ "welds",
 ]
 
 [[package]]
@@ -982,15 +991,6 @@ dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "models"
-version = "0.1.0"
-dependencies = [
- "serde",
- "utility-types",
- "welds",
 ]
 
 [[package]]

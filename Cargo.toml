@@ -1,11 +1,11 @@
 [workspace]
 resolver = "2"
-members = ['api', "lib/*"]
+members = ['api', "lib/*", "domains"]
 
 [workspace.dependencies]
 app = { path = "lib/app" }
 db = { path = "lib/db" }
-models = { path = "lib/models" }
+domains = { path = "domains" }
 sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-native-tls"] }
 tokio = "1.45.0"
 dotenvy = "0.15"
