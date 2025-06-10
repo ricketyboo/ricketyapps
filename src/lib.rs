@@ -1,4 +1,7 @@
+// todo: these mods don't feel like the right place to do this
 pub mod app;
+#[cfg(feature = "ssr")]
+pub mod state;
 
 #[cfg(feature = "ssr")]
 pub mod db;

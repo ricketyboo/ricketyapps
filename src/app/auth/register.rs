@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+
 use super::{Credentials};
 
 #[server]
@@ -6,11 +7,13 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
     use crate::app::auth::user::UserRow;
     use axum::http::StatusCode;
     use leptos::prelude::expect_context;
-    use crate::db::get_pool;
+    use crate::state::AppState;
+
     use super::user::UserDbError;
 
-    // todo: move into main and pass via state/context
-    let pool = get_pool().await.ok().unwrap();
+    let pool = with_context::<AppState, _>(|state| state.pool.clone())
+        .ok_or_else(|| ServerFnError::new("Pool missing."))?;
+
     let opts = expect_context::<leptos_axum::ResponseOptions>();
 
     match UserRow::create(credentials, &pool).await {
