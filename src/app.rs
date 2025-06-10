@@ -1,10 +1,10 @@
 use crate::app::auth::views::{Login, Register};
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
-use leptos_router::components::A;
+use leptos_router::components::{ProtectedRoute, A};
 use leptos_router::{
     components::{Route, Router, Routes},
-    StaticSegment,
+    path, StaticSegment,
 };
 
 pub mod auth;
@@ -34,6 +34,9 @@ pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
+    // todo: read from auth session
+    let (logged_in, set_logged_in) = signal(false);
+
     view! {
         // injects a stylesheet into the document <head>
         // id=leptos means cargo-leptos will hot-reload this stylesheet
@@ -47,16 +50,33 @@ pub fn App() -> impl IntoView {
             <main>
                 // todo: proper aria labels and structure
                 <nav id="main-nav">
-                    // todo: routes visible by auth state
-                    <A href="login">"Login"</A>
-                    <A href="/">"Home"</A>
+                    <Show when=move || logged_in()>
+                        <A href="/">"Home"</A>
+                    </Show>
+                    // todo: trigger auth clear
+                    <button on:click=move |_| {
+                        set_logged_in.update(|n| *n = !*n)
+                    }>{move || if logged_in.get() { "Log Out" } else { "Log In" }}</button>
                 </nav>
                 <Routes fallback=|| "Page not found.".into_view()>
-                    
-                    // todo: routes guarded by auth state
-                    <Route path=StaticSegment("") view=HomePage />
-                    <Route path=StaticSegment("/login") view=Login />
-                    <Route path=StaticSegment("/register") view=Register />
+                    <ProtectedRoute
+                        path=path!("")
+                        condition=move || Some(logged_in.get())
+                        redirect_path=|| "/login"
+                        view=HomePage
+                    />
+                    <ProtectedRoute
+                        path=path!("login")
+                        condition=move || Some(!logged_in.get())
+                        redirect_path=|| "/"
+                        view=Login
+                    />
+                    <ProtectedRoute
+                        path=path!("register")
+                        condition=move || Some(!logged_in.get())
+                        redirect_path=|| "/"
+                        view=Register
+                    />
                 </Routes>
             </main>
         </Router>
