@@ -7,12 +7,12 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
     use crate::app::auth::user::UserRow;
     use axum::http::StatusCode;
     use leptos::prelude::expect_context;
-    use crate::state::AppState;
+    use crate::contexts::use_pool;
 
     use super::user::UserDbError;
 
-    let pool = with_context::<AppState, _>(|state| state.pool.clone())
-        .ok_or_else(|| ServerFnError::new("Pool missing."))?;
+    let pool = use_pool()
+        .ok_or_else(|| ServerFnError::new("Server error"))?;
 
     let opts = expect_context::<leptos_axum::ResponseOptions>();
 

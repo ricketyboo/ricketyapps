@@ -6,6 +6,8 @@ pub mod state;
 #[cfg(feature = "ssr")]
 pub mod db;
 
+pub mod contexts;
+
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
