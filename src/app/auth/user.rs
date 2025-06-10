@@ -1,4 +1,3 @@
-use anyhow::Error;
 use super::{Credentials, User};
 use crate::app::auth::utils::hash_password;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
