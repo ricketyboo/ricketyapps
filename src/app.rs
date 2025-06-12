@@ -96,28 +96,32 @@ pub fn App() -> impl IntoView {
                                 log!("{:?}",url());
                                 set_navigated(Some(url().path().to_string()));
                             });
-
+                            Effect::new(move || {
+                                set_is_logged_in(
+                                    Some(auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r))),
+                                )
+                            });
                             view! {
-                                <div id="app-layout" class="root-layout" style="">
-                                    <p>
-                                        <small>
-                                            "app layout"                                            
-                                        </small>
-                                    </p>
-                                    <nav id="main-nav">
-                                        <A href="/">"Home"</A>
-                                        <A href="/places">"Places"</A>
-                                        <button on:click=move |_| {
-                                            spawn_local(async {
-                                                logout().await;
-                                            });
-                                        }>"Logout"</button>
-                                    </nav>
-                                    <Outlet />
-                                    <p>
-                                        <small>"end app layout"</small>
-                                    </p>
-                                </div>
+                                <Suspense fallback=|| view! { <p>Loading</p> }>
+                                    <div id="app-layout" class="root-layout" style="">
+                                        <p>
+                                            <small>"app layout" {is_logged_in}</small>
+                                        </p>
+                                        <nav id="main-nav">
+                                            <A href="/">"Home"</A>
+                                            <A href="/places">"Places"</A>
+                                            <button on:click=move |_| {
+                                                spawn_local(async {
+                                                    logout().await;
+                                                });
+                                            }>"Logout"</button>
+                                        </nav>
+                                        <Outlet />
+                                        <p>
+                                            <small>"end app layout"</small>
+                                        </p>
+                                    </div>
+                                </Suspense>
                             }
                         }
                     >
