@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_router::components::A;
-use super::{Credentials};
+use crate::app::auth::{Credentials};
 
 #[server]
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
@@ -9,7 +9,7 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
     use leptos::prelude::expect_context;
     use crate::contexts::use_pool;
 
-    use super::user::UserDbError;
+    use crate::app::auth::user::UserDbError;
 
     let pool = use_pool()
         .ok_or_else(|| ServerFnError::new("Server error"))?;

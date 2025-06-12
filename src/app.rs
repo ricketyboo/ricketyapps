@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos::reactive::spawn_local;
-use crate::app::auth::views::{Login, Register};
+use crate::app::auth::routes::{Login, Register};
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::components::{Outlet, ParentRoute, Redirect, Route, A};
 use leptos_router::hooks::{use_url};
