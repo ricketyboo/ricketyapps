@@ -1,10 +1,9 @@
-use leptos::logging::log;
 use leptos::prelude::*;
 use leptos::reactive::spawn_local;
 use crate::app::auth::views::{Login, Register};
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
-use leptos_router::components::{Outlet, ParentRoute, ProtectedParentRoute, Redirect, Route, A};
-use leptos_router::hooks::{use_location, use_navigate, use_url};
+use leptos_router::components::{Outlet, ParentRoute, Redirect, Route, A};
+use leptos_router::hooks::{use_url};
 use leptos_router::{
     components::{Router, Routes},
     path,
@@ -35,14 +34,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 #[server]
 pub async fn check_auth() -> Result<bool, ServerFnError> {
     use axum_session_auth::Authentication;
-
-    println!("checking auth state");
-    // tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
     let auth = leptos_axum::extract::<axum_session_auth::AuthSession<crate::app::auth::User, uuid::Uuid, axum_session_sqlx::SessionPgPool, sqlx::PgPool>>().await?;
-
     let is_logged_in = auth.current_user.is_some_and(|u| u.is_authenticated());
-    // let is_logged_in = rand::random();
-    println!("done checking auth state: {is_logged_in}");
     Ok(is_logged_in)
     // Err(ServerFnError::new("go away"))
 }
@@ -51,7 +44,6 @@ pub async fn check_auth() -> Result<bool, ServerFnError> {
 pub async fn logout() -> Result<(), ServerFnError> {
     use axum_session_sqlx::SessionPgPool;
     let auth = leptos_axum::extract::<axum_session_auth::AuthSession<crate::app::auth::User, uuid::Uuid, axum_session_sqlx::SessionPgPool, sqlx::PgPool>>().await?;
-    println!("Clearing auth session");
     auth.logout_user();
     leptos_axum::redirect("/login");
     Ok(())
@@ -61,11 +53,10 @@ pub async fn logout() -> Result<(), ServerFnError> {
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
-    // let is_logged_in = move || auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r));
+    
+    // todo: try to move this and the effects later into a ProtectedAuthRoute component
     let (navigated, set_navigated) = signal(None::<String>);
     let auth_resource = Resource::new_blocking(navigated, |_| check_auth());
-    // let (is_logged_in, set_is_logged_in) = signal(None::<bool>);
-
 
     view! {
         // injects a stylesheet into the document <head>
@@ -84,9 +75,7 @@ pub fn App() -> impl IntoView {
                         path=path!("")
                         view=move || {
                             Effect::new(move || {
-                                log!("navigation");
                                 let url = use_url();
-                                log!("{:?}",url());
                                 set_navigated(Some(url().path().to_string()));
                             });
                             view! {
@@ -95,8 +84,6 @@ pub fn App() -> impl IntoView {
                                 }>
                                     {move || Suspend::new(async move {
                                         let is_logged_in = auth_resource.await.is_ok_and(|r| r);
-                                        log!("is logged in?: {}", is_logged_in);
-                                        log!("url?: {}", use_url().get().path());
                                         view! {
                                             <Show
                                                 when=move || { is_logged_in }
@@ -137,9 +124,7 @@ pub fn App() -> impl IntoView {
                         path=path!("")
                         view=move || {
                             Effect::new(move || {
-                                log!("navigation");
                                 let url = use_url();
-                                log!("{:?}",url());
                                 set_navigated(Some(url().path().to_string()));
                             });
                             view! { <Outlet /> }
@@ -152,8 +137,6 @@ pub fn App() -> impl IntoView {
             </main>
         </Router>
     }
-
-    // let auth_resource = Resource::new_blocking(use_url, |_| check_auth());
 }
 
 /// Renders the home page of your application.
