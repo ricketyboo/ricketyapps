@@ -98,7 +98,9 @@ pub fn App() -> impl IntoView {
                                                         <A href="/places">"Places"</A>
                                                         <button on:click=move |_| {
                                                             spawn_local(async {
-                                                                logout().await;
+                                                                logout()
+                                                                    .await
+                                                                    .expect("Couldn't log out. What does this mean?");
                                                             });
                                                         }>"Logout"</button>
                                                     </nav>
@@ -127,6 +129,7 @@ pub fn App() -> impl IntoView {
                                 let url = use_url();
                                 set_navigated(Some(url().path().to_string()));
                             });
+                            // todo: go back to home if here and logged in already
                             view! { <Outlet /> }
                         }
                     >
