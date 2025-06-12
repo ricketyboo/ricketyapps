@@ -37,7 +37,7 @@ pub async fn check_auth() -> Result<bool, ServerFnError> {
     use axum_session_auth::Authentication;
 
     println!("checking auth state");
-    // tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
     let auth = leptos_axum::extract::<axum_session_auth::AuthSession<crate::app::auth::User, uuid::Uuid, axum_session_sqlx::SessionPgPool, sqlx::PgPool>>().await?;
 
     let is_logged_in = auth.current_user.is_some_and(|u| u.is_authenticated());
@@ -65,9 +65,7 @@ pub fn App() -> impl IntoView {
     let (navigated, set_navigated) = signal(None::<String>);
     let (is_logged_in, set_is_logged_in) = signal(None::<bool>);
 
-    // to check on every page navigation
-    let auth_resource = Resource::new_blocking(navigated, |_| check_auth());
-    // let auth_resource = OnceResource::new_blocking(check_auth());
+    let auth_resource = Resource::new(navigated, |_| check_auth());
     
     view! {
         // injects a stylesheet into the document <head>
@@ -96,16 +94,21 @@ pub fn App() -> impl IntoView {
                                 log!("{:?}",url());
                                 set_navigated(Some(url().path().to_string()));
                             });
-                            Effect::new(move || {
-                                set_is_logged_in(
-                                    Some(auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r))),
-                                )
-                            });
+                            // Effect::new(move || {
+                            // set_is_logged_in(
+                            // Some(auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r))),
+                            // )
+                            // });
                             view! {
-                                <Suspense fallback=|| view! { <p>Loading</p> }>
+                                <Suspense fallback=move || view! { <p>Loading...</p> }>
+                                    <Show when=move || {
+                                        !auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r))
+                                    }>
+                                        <small>"not logged in"</small>
+                                    </Show>
                                     <div id="app-layout" class="root-layout" style="">
                                         <p>
-                                            <small>"app layout" {is_logged_in}</small>
+                                            <small>"app layout"</small>
                                         </p>
                                         <nav id="main-nav">
                                             <A href="/">"Home"</A>
