@@ -1,11 +1,10 @@
-
 use leptos::logging::log;
 use leptos::prelude::*;
 use leptos::reactive::spawn_local;
 use crate::app::auth::views::{Login, Register};
-use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
-use leptos_router::components::{A, Outlet, ParentRoute, Route, Redirect};
-use leptos_router::hooks::{use_navigate, use_url};
+use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
+use leptos_router::components::{Outlet, ParentRoute, ProtectedParentRoute, Redirect, Route, A};
+use leptos_router::hooks::{use_location, use_navigate, use_url};
 use leptos_router::{
     components::{Router, Routes},
     path,
@@ -38,13 +37,13 @@ pub async fn check_auth() -> Result<bool, ServerFnError> {
     use axum_session_auth::Authentication;
 
     println!("checking auth state");
-    // Ok(false)
-    let auth = leptos_axum::extract::<axum_session_auth::AuthSession<crate::app::auth::User, uuid::Uuid, axum_session_sqlx::SessionPgPool, sqlx::PgPool>>().await?;
-    Ok(auth.current_user.is_some_and(|u| u.is_authenticated()))
     // tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
-    // Ok(rand::random())
-    // Ok(true)
-    // Ok(false)
+    let auth = leptos_axum::extract::<axum_session_auth::AuthSession<crate::app::auth::User, uuid::Uuid, axum_session_sqlx::SessionPgPool, sqlx::PgPool>>().await?;
+
+    let is_logged_in = auth.current_user.is_some_and(|u| u.is_authenticated());
+    // let is_logged_in = rand::random();
+    println!("done checking auth state: {is_logged_in}");
+    Ok(is_logged_in)
     // Err(ServerFnError::new("go away"))
 }
 
@@ -52,6 +51,7 @@ pub async fn check_auth() -> Result<bool, ServerFnError> {
 pub async fn logout() -> Result<(), ServerFnError> {
     use axum_session_sqlx::SessionPgPool;
     let auth = leptos_axum::extract::<axum_session_auth::AuthSession<crate::app::auth::User, uuid::Uuid, axum_session_sqlx::SessionPgPool, sqlx::PgPool>>().await?;
+    println!("Clearing auth session");
     auth.logout_user();
     leptos_axum::redirect("/login");
     Ok(())
@@ -61,9 +61,14 @@ pub async fn logout() -> Result<(), ServerFnError> {
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
+    // let is_logged_in = move || auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r));
+    let (navigated, set_navigated) = signal(None::<String>);
+    let (is_logged_in, set_is_logged_in) = signal(None::<bool>);
 
-    // let auth_resource = OnceResource::new(check_auth());
-
+    // to check on every page navigation
+    // let auth_resource = Resource::new_blocking(navigated, |_| check_auth());
+    let auth_resource = OnceResource::new_blocking(check_auth());    
+    
     view! {
         // injects a stylesheet into the document <head>
         // id=leptos means cargo-leptos will hot-reload this stylesheet
@@ -78,90 +83,49 @@ pub fn App() -> impl IntoView {
                 // todo: proper aria labels and structure
                 <Routes fallback=|| "Page not found.".into_view()>
                     <ParentRoute
+                        // fallback=|| view! { <p>Loading</p> }
                         path=path!("")
+                        // condition=move || Some(
+                        // auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r)),
+                        // )
+                        // redirect_path=|| "/login"
                         view=move || {
-                            let url = use_url();
-                            let auth_resource = Resource::new(url, move |_| check_auth());
-                            Effect::new(move |_| {
-                                let is_logged_in = auth_resource
-                                    .get()
-                                    .is_some_and(|res| {
-                                        res.is_ok_and(|is_logged_in| is_logged_in)
-                                    });
-                                log!("{:?}", auth_resource.get());
-                                if !is_logged_in {
-                                    log!("not logged in and shouldn't be here, go login");
-                                    let navigate = use_navigate();
-                                    navigate("/login", Default::default());
-                                }
+                            Effect::new(move || {
+                                log!("navigation");
+                                let url = use_url();
+                                log!("{:?}",url());
                             });
 
                             view! {
-                                <Suspense fallback=|| {
-                                    view! { <p>"Checking auth..."</p> }
-                                }>
-                                    <Show
-                                        when=move || {
-                                            auth_resource
-                                                .get()
-                                                .is_some_and(|res| {
-                                                    res.is_ok_and(|is_logged_in| is_logged_in)
-                                                })
-                                        }
-                                        fallback=move || {
-                                            view! { <p>oh no</p> }
-                                        }
-                                    >
-                                        <div id="app-layout" class="root-layout" style="">
-                                            <p>
-                                                <small>"app layout"</small>
-                                                {format!("auth?{:?}", auth_resource.get())}
-                                            </p>
-                                            <nav id="main-nav">
-                                                <A href="/">"Home"</A>
-                                                <A href="/places">"Places"</A>
-                                                <button on:click=move |_| {
-                                                    spawn_local(async {
-                                                        logout().await;
-                                                    });
-                                                }>"Logout"</button>
-                                            </nav>
-                                            <Outlet />
-                                            <p>
-                                                <small>"end app layout"</small>
-                                            </p>
-                                        </div>
-                                    </Show>
-                                </Suspense>
+                                <div id="app-layout" class="root-layout" style="">
+                                    <p>
+                                        <small>"app layout"</small>
+                                    </p>
+                                    <nav id="main-nav">
+                                        <A href="/">"Home"</A>
+                                        <A href="/places">"Places"</A>
+                                        <button on:click=move |_| {
+                                            spawn_local(async {
+                                                logout().await;
+                                            });
+                                        }>"Logout"</button>
+                                    </nav>
+                                    <Outlet />
+                                    <p>
+                                        <small>"end app layout"</small>
+                                    </p>
+                                </div>
                             }
                         }
                     >
                         <Route path=path!("") view=HomePage />
                         <Route path=path!("places") view=PlacePage />
                     </ParentRoute>
+
                     // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model
                     // <AuthRoutes logged_in />
-                    <ParentRoute
-                        path=path!("")
-                        view=move || {
-                            log!("in auth routes");
-                            view! {
-                                <div id="auth-layout" class="root-layout" style="">
-                                    <p>
-                                        <small>"auth layout d"</small>
-                                    // {format!("auth_resource?{:?}", auth_resource.get())}
-                                    </p>
-                                    <Outlet />
-                                    <p>
-                                        <small>"end auth layout"</small>
-                                    </p>
-                                </div>
-                            }
-                        }
-                    >
-                        <Route path=path!("login") view=Login />
-                        <Route path=path!("register") view=Register />
-                    </ParentRoute>
+
+                    <Route path=path!("login") view=Login />
                 </Routes>
             </main>
         </Router>
