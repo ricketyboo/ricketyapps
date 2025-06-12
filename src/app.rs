@@ -37,7 +37,7 @@ pub async fn check_auth() -> Result<bool, ServerFnError> {
     use axum_session_auth::Authentication;
 
     println!("checking auth state");
-    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+    // tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
     let auth = leptos_axum::extract::<axum_session_auth::AuthSession<crate::app::auth::User, uuid::Uuid, axum_session_sqlx::SessionPgPool, sqlx::PgPool>>().await?;
 
     let is_logged_in = auth.current_user.is_some_and(|u| u.is_authenticated());
@@ -63,10 +63,10 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
     // let is_logged_in = move || auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r));
     let (navigated, set_navigated) = signal(None::<String>);
-    let (is_logged_in, set_is_logged_in) = signal(None::<bool>);
-
     let auth_resource = Resource::new_blocking(navigated, |_| check_auth());
-    
+    // let (is_logged_in, set_is_logged_in) = signal(None::<bool>);
+
+
     view! {
         // injects a stylesheet into the document <head>
         // id=leptos means cargo-leptos will hot-reload this stylesheet
@@ -81,12 +81,7 @@ pub fn App() -> impl IntoView {
                 // todo: proper aria labels and structure
                 <Routes fallback=|| "Page not found.".into_view()>
                     <ParentRoute
-                        // fallback=|| view! { <p>Loading</p> }
                         path=path!("")
-                        // condition=move || Some(
-                        // auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r)),
-                        // )
-                        // redirect_path=|| "/login"
                         view=move || {
                             Effect::new(move || {
                                 log!("navigation");
@@ -100,7 +95,8 @@ pub fn App() -> impl IntoView {
                                 }>
                                     {move || Suspend::new(async move {
                                         let is_logged_in = auth_resource.await.is_ok_and(|r| r);
-                                        log!("is logged in?: {is_logged_in}");
+                                        log!("is logged in?: {}", is_logged_in);
+                                        log!("url?: {}", use_url().get().path());
                                         view! {
                                             <Show
                                                 when=move || { is_logged_in }
@@ -108,7 +104,7 @@ pub fn App() -> impl IntoView {
                                             >
                                                 <div id="app-layout" class="root-layout" style="">
                                                     <p>
-                                                        <small>"app layout"</small>
+                                                        <small>"app layout"{is_logged_in}</small>
                                                     </p>
                                                     <nav id="main-nav">
                                                         <A href="/">"Home"</A>
@@ -137,12 +133,27 @@ pub fn App() -> impl IntoView {
 
                     // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model
                     // <AuthRoutes logged_in />
-
-                    <Route path=path!("login") view=Login />
+                    <ParentRoute
+                        path=path!("")
+                        view=move || {
+                            Effect::new(move || {
+                                log!("navigation");
+                                let url = use_url();
+                                log!("{:?}",url());
+                                set_navigated(Some(url().path().to_string()));
+                            });
+                            view! { <Outlet /> }
+                        }
+                    >
+                        <Route path=path!("login") view=Login />
+                        <Route path=path!("register") view=Register />
+                    </ParentRoute>
                 </Routes>
             </main>
         </Router>
     }
+
+    // let auth_resource = Resource::new_blocking(use_url, |_| check_auth());
 }
 
 /// Renders the home page of your application.
