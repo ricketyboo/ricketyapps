@@ -65,7 +65,7 @@ pub fn App() -> impl IntoView {
     let (navigated, set_navigated) = signal(None::<String>);
     let (is_logged_in, set_is_logged_in) = signal(None::<bool>);
 
-    let auth_resource = Resource::new(navigated, |_| check_auth());
+    let auth_resource = Resource::new_blocking(navigated, |_| check_auth());
     
     view! {
         // injects a stylesheet into the document <head>
@@ -94,36 +94,39 @@ pub fn App() -> impl IntoView {
                                 log!("{:?}",url());
                                 set_navigated(Some(url().path().to_string()));
                             });
-                            // Effect::new(move || {
-                            // set_is_logged_in(
-                            // Some(auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r))),
-                            // )
-                            // });
                             view! {
-                                <Suspense fallback=move || view! { <p>Loading...</p> }>
-                                    <Show when=move || {
-                                        !auth_resource.get().is_some_and(|r| r.is_ok_and(|r| r))
-                                    }>
-                                        <small>"not logged in"</small>
-                                    </Show>
-                                    <div id="app-layout" class="root-layout" style="">
-                                        <p>
-                                            <small>"app layout"</small>
-                                        </p>
-                                        <nav id="main-nav">
-                                            <A href="/">"Home"</A>
-                                            <A href="/places">"Places"</A>
-                                            <button on:click=move |_| {
-                                                spawn_local(async {
-                                                    logout().await;
-                                                });
-                                            }>"Logout"</button>
-                                        </nav>
-                                        <Outlet />
-                                        <p>
-                                            <small>"end app layout"</small>
-                                        </p>
-                                    </div>
+                                <Suspense fallback=move || {
+                                    view! { <p>Loading...</p> }
+                                }>
+                                    {move || Suspend::new(async move {
+                                        let is_logged_in = auth_resource.await.is_ok_and(|r| r);
+                                        log!("is logged in?: {is_logged_in}");
+                                        view! {
+                                            <Show
+                                                when=move || { is_logged_in }
+                                                fallback=move || view! { <Redirect path="/login" /> }
+                                            >
+                                                <div id="app-layout" class="root-layout" style="">
+                                                    <p>
+                                                        <small>"app layout"</small>
+                                                    </p>
+                                                    <nav id="main-nav">
+                                                        <A href="/">"Home"</A>
+                                                        <A href="/places">"Places"</A>
+                                                        <button on:click=move |_| {
+                                                            spawn_local(async {
+                                                                logout().await;
+                                                            });
+                                                        }>"Logout"</button>
+                                                    </nav>
+                                                    <Outlet />
+                                                    <p>
+                                                        <small>"end app layout"</small>
+                                                    </p>
+                                                </div>
+                                            </Show>
+                                        }
+                                    })}
                                 </Suspense>
                             }
                         }
