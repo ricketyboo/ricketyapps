@@ -66,8 +66,8 @@ pub fn App() -> impl IntoView {
     let (is_logged_in, set_is_logged_in) = signal(None::<bool>);
 
     // to check on every page navigation
-    // let auth_resource = Resource::new_blocking(navigated, |_| check_auth());
-    let auth_resource = OnceResource::new_blocking(check_auth());    
+    let auth_resource = Resource::new_blocking(navigated, |_| check_auth());
+    // let auth_resource = OnceResource::new_blocking(check_auth());
     
     view! {
         // injects a stylesheet into the document <head>
@@ -94,12 +94,15 @@ pub fn App() -> impl IntoView {
                                 log!("navigation");
                                 let url = use_url();
                                 log!("{:?}",url());
+                                set_navigated(Some(url().path().to_string()));
                             });
 
                             view! {
                                 <div id="app-layout" class="root-layout" style="">
                                     <p>
-                                        <small>"app layout"</small>
+                                        <small>
+                                            "app layout"                                            
+                                        </small>
                                     </p>
                                     <nav id="main-nav">
                                         <A href="/">"Home"</A>
