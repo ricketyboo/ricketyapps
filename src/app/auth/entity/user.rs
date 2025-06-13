@@ -1,4 +1,4 @@
-use super::{Credentials, User};
+use crate::app::auth::{Credentials, User};
 use crate::app::auth::utils::hash_password;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum_session_auth::Authentication;

@@ -4,11 +4,11 @@ use leptos_router::components::A;
 
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError> {
-    use crate::app::auth::user::UserRow;
+    use crate::app::auth::entity::user::UserRow;
     use axum::http::StatusCode;    
     use leptos::prelude::expect_context;
     use crate::contexts::use_pool;
-    use crate::app::auth::user::UserDbError;
+    use crate::app::auth::entity::user::UserDbError;
     use axum_session_auth::AuthSession;
     use axum_session_sqlx::SessionPgPool;
     use uuid::Uuid;

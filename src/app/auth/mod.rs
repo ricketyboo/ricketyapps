@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[cfg(feature = "ssr")]
-mod user;
-#[cfg(feature = "ssr")]
 mod utils;
+
+mod entity;
 
 mod views;
 

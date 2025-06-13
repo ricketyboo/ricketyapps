@@ -4,12 +4,12 @@ use crate::app::auth::{Credentials};
 
 #[server]
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
-    use crate::app::auth::user::UserRow;
+    use crate::app::auth::entity::user::UserRow;
     use axum::http::StatusCode;
     use leptos::prelude::expect_context;
     use crate::contexts::use_pool;
 
-    use crate::app::auth::user::UserDbError;
+    use crate::app::auth::entity::user::UserDbError;
 
     let pool = use_pool()
         .ok_or_else(|| ServerFnError::new("Server error"))?;
