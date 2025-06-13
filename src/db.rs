@@ -41,7 +41,6 @@ impl DatabaseConfiguration {
 
 pub async fn get_client() -> PostgresClient {
     let db_config = DatabaseConfiguration::from_env();
-    println!("{}", db_config.connection_string());
     welds::connections::postgres::connect(&db_config.connection_string())
         .await
         .unwrap()
