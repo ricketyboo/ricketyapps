@@ -23,8 +23,7 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
             let auth = leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
             
             auth.login_user(u.id);
-            
-            println!("Login Successful: {u:?}");
+
             // todo: add support for navigating back to an intended url pre login.
             //  would have to have stored it in session during original auth check
 

@@ -132,9 +132,7 @@ impl Authentication<User, Uuid, PgPool> for User {
         let welds_client: PostgresClient = pool.unwrap().clone().into();
         match UserRow::find_by_id(&welds_client, userid).await {
             Ok(Some(u)) => {
-                let user: User = u.into_inner().into();
-                println!("Found user: {user:?}");
-                Ok(user)
+                Ok(u.into_inner().into())
             },
             Ok(None) => {
                 Ok(User {
