@@ -1,9 +1,9 @@
+use crate::app::auth::routes::{Login, Register};
 use leptos::prelude::*;
 use leptos::reactive::spawn_local;
-use crate::app::auth::routes::{Login, Register};
-use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
-use leptos_router::components::{Outlet, ParentRoute, Redirect, Route, A};
-use leptos_router::hooks::{use_url};
+use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
+use leptos_router::components::{A, Outlet, ParentRoute, Redirect, Route};
+use leptos_router::hooks::use_url;
 use leptos_router::{
     components::{Router, Routes},
     path,
@@ -35,7 +35,10 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 pub async fn check_auth() -> Result<bool, ServerFnError> {
     use axum_session_auth::Authentication;
     use axum_session_sqlx::SessionPgPool;
-    let auth = leptos_axum::extract::<axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>>().await?;
+    let auth = leptos_axum::extract::<
+        axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>,
+    >()
+    .await?;
     let is_logged_in = auth.current_user.is_some_and(|u| u.is_authenticated());
     Ok(is_logged_in)
 }
@@ -43,7 +46,10 @@ pub async fn check_auth() -> Result<bool, ServerFnError> {
 #[server]
 pub async fn logout() -> Result<(), ServerFnError> {
     use axum_session_sqlx::SessionPgPool;
-    let auth = leptos_axum::extract::<axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>>().await?;
+    let auth = leptos_axum::extract::<
+        axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>,
+    >()
+    .await?;
     auth.logout_user();
     leptos_axum::redirect("/login");
     Ok(())
@@ -53,7 +59,7 @@ pub async fn logout() -> Result<(), ServerFnError> {
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
-    
+
     // todo: try to move this and the effects later into a ProtectedAuthRoute component
     let (navigated, set_navigated) = signal(None::<String>);
     let auth_resource = Resource::new_blocking(navigated, |_| check_auth());

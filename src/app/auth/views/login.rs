@@ -1,27 +1,27 @@
-use crate::app::auth::{Credentials};
+use crate::app::auth::Credentials;
 use leptos::prelude::*;
 use leptos_router::components::A;
 
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError> {
-    use crate::app::auth::entity::user::UserRow;
-    use axum::http::StatusCode;    
-    use leptos::prelude::expect_context;
-    use crate::contexts::use_client;
+    use crate::app::auth::User;
     use crate::app::auth::entity::user::UserDbError;
+    use crate::app::auth::entity::user::UserRow;
+    use crate::contexts::use_client;
+    use axum::http::StatusCode;
     use axum_session_auth::AuthSession;
     use axum_session_sqlx::SessionPgPool;
-    use uuid::Uuid;
+    use leptos::prelude::expect_context;
     use sqlx::PgPool;
-    use crate::app::auth::{User};
+    use uuid::Uuid;
 
-    let client = use_client()
-        .ok_or_else(|| ServerFnError::new("Server error"))?;
+    let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
 
     match UserRow::get_by_credentials(credentials, &client).await {
         Ok(Some(u)) => {
-            let auth = leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
-            
+            let auth =
+                leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
+
             auth.login_user(u.id);
 
             // todo: add support for navigating back to an intended url pre login.
@@ -36,33 +36,24 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
             opts.set_status(StatusCode::UNAUTHORIZED);
             Err(ServerFnError::new("Invalid credentials"))
         }
-        Err(e) => {
-            match e {
-                UserDbError::UsernameExists => {
-                    unreachable!("Username exists error when trying to login")
-                }
-                UserDbError::UsernameNotExists => {
-                    let opts = expect_context::<leptos_axum::ResponseOptions>();
-                    opts.set_status(StatusCode::UNAUTHORIZED);
-                    Err(ServerFnError::new("Invalid credentials"))
-                }
-                UserDbError::UnknownError => {
-                    Err(ServerFnError::new("System error"))
-                }
+        Err(e) => match e {
+            UserDbError::UsernameExists => {
+                unreachable!("Username exists error when trying to login")
             }
-        }
+            UserDbError::UsernameNotExists => {
+                let opts = expect_context::<leptos_axum::ResponseOptions>();
+                opts.set_status(StatusCode::UNAUTHORIZED);
+                Err(ServerFnError::new("Invalid credentials"))
+            }
+            UserDbError::UnknownError => Err(ServerFnError::new("System error")),
+        },
     }
 }
 
 #[component]
 pub fn Login() -> impl IntoView {
     let action = ServerAction::<TryLogin>::new();
-    let value = Signal::derive(move || {
-        action
-            .value()
-            .get()
-            .unwrap_or_else(|| Ok("".into()))
-    });
+    let value = Signal::derive(move || action.value().get().unwrap_or_else(|| Ok("".into())));
 
     view! {
         <h2>"Login"</h2>

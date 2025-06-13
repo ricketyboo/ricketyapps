@@ -1,19 +1,17 @@
+use crate::app::auth::Credentials;
 use leptos::prelude::*;
 use leptos_router::components::A;
-use crate::app::auth::{Credentials};
 
 #[server]
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
     use crate::app::auth::entity::user::UserRow;
+    use crate::contexts::use_client;
     use axum::http::StatusCode;
     use leptos::prelude::expect_context;
-    use crate::contexts::use_client;
-
 
     use crate::app::auth::entity::user::UserDbError;
 
-    let client = use_client()
-        .ok_or_else(|| ServerFnError::new("Server error"))?;
+    let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
 
     let opts = expect_context::<leptos_axum::ResponseOptions>();
 
@@ -34,9 +32,11 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
                 UserDbError::UnknownError => {
                     opts.set_status(StatusCode::BAD_REQUEST);
                     Err(ServerFnError::new("Unable to register"))
-                },
+                }
                 // todo: this probably  means I should split out errors based on what journey I'm oninstead of pushing them all into one enum
-                UserDbError::UsernameNotExists => unreachable!("User not exists error gotten on register flow")
+                UserDbError::UsernameNotExists => {
+                    unreachable!("User not exists error gotten on register flow")
+                }
             }
         }
     }
@@ -45,13 +45,8 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
 #[component]
 pub fn Register() -> impl IntoView {
     let action = ServerAction::<TryRegister>::new();
-    let value = Signal::derive(move || {
-        action
-            .value()
-            .get()
-            .unwrap_or_else(|| Ok(String::new()))
-    });
-    
+    let value = Signal::derive(move || action.value().get().unwrap_or_else(|| Ok(String::new())));
+
     view! {
         <h2>"Register"</h2>
         <ErrorBoundary fallback=move |errors| {
