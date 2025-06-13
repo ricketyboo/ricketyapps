@@ -37,11 +37,9 @@ pub enum UserDbError {
 
 impl UserRow {
     async fn username_exists(username: &str, client: &PostgresClient) -> Result<bool, UserDbError> {
-        // todo: convert to welds query
-        let pool = client.as_sqlx_pool();
         let username_exists: bool = sqlx::query_scalar(
             "SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)"
-        ).bind(username.to_string()).fetch_one(pool).await.map_err(|e1| {
+        ).bind(username.to_string()).fetch_one(client.as_sqlx_pool()).await.map_err(|e1| {
             println!("Error: {e1:?}");
             UserDbError::UnknownError
         })?;
