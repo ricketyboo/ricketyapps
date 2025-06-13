@@ -4,10 +4,15 @@ use leptos_router::components::A;
 
 #[server]
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
+    use crate::app::auth::User;
     use crate::app::auth::entity::user::UserRow;
     use crate::contexts::use_client;
     use axum::http::StatusCode;
+    use axum_session_auth::AuthSession;
+    use axum_session_sqlx::SessionPgPool;
     use leptos::prelude::expect_context;
+    use sqlx::PgPool;
+    use uuid::Uuid;
 
     use crate::app::auth::entity::user::UserDbError;
 
@@ -18,9 +23,14 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
     match UserRow::create(credentials, &client).await {
         Ok(user_row) => {
             opts.set_status(StatusCode::CREATED);
-            // todo: initialise session
-            leptos_axum::redirect("/login");
+            let auth =
+                leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
+
+            auth.login_user(user_row.id);
+
+            leptos_axum::redirect("/");
             // return Ok(User::from(user_row))
+            // todo: this isn't necessary
             Ok(user_row.id.to_string())
         }
         Err(e) => {
