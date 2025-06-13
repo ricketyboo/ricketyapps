@@ -1,4 +1,4 @@
-use crate::app::auth::{Credentials, User};
+use crate::app::auth::{Credentials};
 use leptos::prelude::*;
 use leptos_router::components::A;
 
@@ -13,6 +13,7 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
     use axum_session_sqlx::SessionPgPool;
     use uuid::Uuid;
     use sqlx::PgPool;
+    use crate::app::auth::{User};
 
     let client = use_client()
         .ok_or_else(|| ServerFnError::new("Server error"))?;
