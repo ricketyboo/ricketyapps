@@ -59,19 +59,16 @@ impl UserRow {
         };
 
         let password_hash = hash_password(&credentials.password).await.unwrap();
-        // todo: convert to welds query
-        let pool = client.as_sqlx_pool();
-        match query_as::<_, UserRow>("INSERT INTO users (username, password_hash) VALUES ( $1,  $2) returning *")
-            .bind(credentials.username)
-            .bind(password_hash)
-            .fetch_one(pool)
-            .await {
-            Err(e) => {
-                println!("{e}");
-                Err(UserDbError::UnknownError)
+        let mut model = UserRow::new();
+        model.username = credentials.username;
+        model.password_hash = password_hash;
+        match model.save(client).await {
+            Ok(_) => {
+                Ok(model.into_inner())
             },
-            Ok(u) => {
-                Ok(u)
+            Err(e) => {
+                println!("{e:?}");
+                Err(UserDbError::UnknownError)
             }
         }
     }
