@@ -2,7 +2,7 @@ use crate::app::auth::{Credentials, User};
 use crate::app::auth::utils::hash_password;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum_session_auth::Authentication;
-use sqlx::{query_as, PgPool};
+use sqlx::{PgPool};
 use uuid::Uuid;
 
 use thiserror::Error;
@@ -76,18 +76,14 @@ impl UserRow {
         if !username_exists {
             return Err(UserDbError::UsernameNotExists)
         };
-        // todo: convert to welds query
-        let pool = client.as_sqlx_pool();
-        match query_as::<_, UserRow>("SELECT * FROM users WHERE username = $1")
-            .bind(username)
-            .fetch_one(pool)
-            .await {
+        match UserRow::where_col(move |u| u.username.equal(username.clone()))
+            .fetch_one(client).await {
+            Ok(row) => {
+                Ok(Some(row.into_inner()))
+            }
             Err(e) => {
                 println!("get_by_username: {e}");
                 Err(UserDbError::UnknownError)
-            },
-            Ok(u) => {
-                Ok(Some(u))
             }
         }
     }
@@ -106,7 +102,7 @@ impl UserRow {
                 // between not found and found user checks and avoid potential information leak
                 // about existence of user existence
                 // rethink if this is actually meaningful if we're using usernames and not emails to login; as we have to report  existence errors in registration anyway?
-                // Why is it okay to expose this info durng registration but not during login?
+                // Why is it okay to expose this info during registration but not during login?
                 let password_hash = hash_password(&credentials.password).await.unwrap();
                 PasswordHash::new(&password_hash).expect("Unable to hash dummy password hash");
                 Ok(None)
