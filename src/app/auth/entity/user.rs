@@ -97,12 +97,12 @@ impl UserRow {
         }
     }
     
-    pub async fn get_by_credentials(credentials: Credentials, client: &PostgresClient) -> Result<Option<UserRow>, UserDbError>  {
+    pub async fn get_by_credentials(credentials: Credentials, client: &PostgresClient) -> Result<Option<User>, UserDbError>  {
         match Self::get_by_username(credentials.username, client).await {
             Ok(Some(u)) => {
                 let expected_hash = PasswordHash::new(&u.password_hash).expect("Unable to hash user password hash");
                 if Argon2::default().verify_password(credentials.password.as_bytes(), &expected_hash).is_ok() {
-                    return Ok(Some(u))
+                    return Ok(Some(User::from(u)))
                 }
                 Ok(None)
             }
@@ -140,7 +140,7 @@ impl Authentication<User, Uuid, PgPool> for User {
         // but because welds wants a client we have to convert it from the pool.
         let welds_client: PostgresClient = pool.unwrap().clone().into();
         match UserRow::find_by_id(&welds_client, userid).await {
-            Ok(Some(u)) => {                
+            Ok(Some(u)) => {
                 let user: User = u.into_inner().into();
                 println!("Found user: {user:?}");
                 Ok(user)
