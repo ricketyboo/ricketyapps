@@ -1,11 +1,11 @@
 use axum::extract::FromRef;
 use leptos::prelude::LeptosOptions;
 use leptos_axum::AxumRouteListing;
-use sqlx::PgPool;
+use welds::connections::postgres::PostgresClient;
 
-#[derive(FromRef, Debug, Clone)]
+#[derive(FromRef, Clone)]
 pub struct AppState {
     pub leptos_options: LeptosOptions,
-    pub pool: PgPool,
+    pub client: PostgresClient,
     pub routes: Vec<AxumRouteListing>,
 }

@@ -10,7 +10,7 @@ async fn main() {
     use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use rickety_apps::app::*;
-    use rickety_apps::db::get_pool;
+    use rickety_apps::db::get_client;
     use axum_session::{
         SessionConfig,
         SessionLayer,
@@ -27,7 +27,8 @@ async fn main() {
 
     use rickety_apps::app::auth::*;
 
-    let pool = get_pool().await.expect("Unable to get DB pool");
+    let client = get_client().await;
+    let pool = client.as_sqlx_pool();
 
     let session_config = SessionConfig::default().with_table_name("sessions");
     // todo: redis sessions instead of pg
@@ -43,7 +44,7 @@ async fn main() {
 
     let app_state = AppState {
         leptos_options,
-        pool: pool.clone(),
+        client: client.clone(),
         routes: routes.clone()
     };
 

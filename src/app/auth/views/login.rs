@@ -7,17 +7,17 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
     use crate::app::auth::entity::user::UserRow;
     use axum::http::StatusCode;    
     use leptos::prelude::expect_context;
-    use crate::contexts::use_pool;
+    use crate::contexts::use_client;
     use crate::app::auth::entity::user::UserDbError;
     use axum_session_auth::AuthSession;
     use axum_session_sqlx::SessionPgPool;
     use uuid::Uuid;
     use sqlx::PgPool;
 
-    let pool = use_pool()
+    let client = use_client()
         .ok_or_else(|| ServerFnError::new("Server error"))?;
 
-    match UserRow::get_by_credentials(credentials, &pool).await {
+    match UserRow::get_by_credentials(credentials, &client).await {
         Ok(Some(u)) => {
             let auth = leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
             

@@ -7,16 +7,17 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
     use crate::app::auth::entity::user::UserRow;
     use axum::http::StatusCode;
     use leptos::prelude::expect_context;
-    use crate::contexts::use_pool;
+    use crate::contexts::use_client;
+
 
     use crate::app::auth::entity::user::UserDbError;
 
-    let pool = use_pool()
+    let client = use_client()
         .ok_or_else(|| ServerFnError::new("Server error"))?;
 
     let opts = expect_context::<leptos_axum::ResponseOptions>();
 
-    match UserRow::create(credentials, &pool).await {
+    match UserRow::create(credentials, &client).await {
         Ok(user_row) => {
             opts.set_status(StatusCode::CREATED);
             // todo: initialise session

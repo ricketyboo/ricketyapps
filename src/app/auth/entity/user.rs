@@ -6,9 +6,13 @@ use sqlx::{query_as, PgPool};
 use uuid::Uuid;
 
 use thiserror::Error;
+use welds::connections::postgres::PostgresClient;
+use welds::WeldsModel;
 
-#[derive(sqlx::FromRow, Clone, Debug)]
+#[derive(sqlx::FromRow, Debug, WeldsModel)]
+#[welds(table = "users")]
 pub struct UserRow {
+    #[welds(primary_key)]
     pub(crate) id: Uuid,
     username: String,
     // todo: SecretString
@@ -32,21 +36,9 @@ pub enum UserDbError {
 }
 
 impl UserRow {
-    async fn get_by_id(user_id: Uuid, pool: &PgPool)-> Result<Option<UserRow>, UserDbError> {
-        match query_as::<_, UserRow>("SELECT * FROM users WHERE id = $1")
-            .bind(user_id)
-            .fetch_one(pool)
-            .await {
-            Err(e) => {
-                println!("get_by_id: {e}");
-                Err(UserDbError::UnknownError)
-            },
-            Ok(u) => {
-                Ok(Some(u))
-            }
-        }
-    }
-    async fn username_exists(username: &str, pool: &PgPool) -> Result<bool, UserDbError> {
+    async fn username_exists(username: &str, client: &PostgresClient) -> Result<bool, UserDbError> {
+        // todo: convert to welds query
+        let pool = client.as_sqlx_pool();
         let username_exists: bool = sqlx::query_scalar(
             "SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)"
         ).bind(username.to_string()).fetch_one(pool).await.map_err(|e1| {
@@ -55,19 +47,20 @@ impl UserRow {
         })?;
         Ok(username_exists)
     }
-    pub async fn create(credentials: Credentials, pool: &PgPool) -> Result<UserRow, UserDbError> {
+    pub async fn create(credentials: Credentials, client: &PostgresClient) -> Result<UserRow, UserDbError> {
         // todo: validations
         //  - no empty values
         //  - minimum pw length/strength validations 
         
-        let username_taken: bool =  Self::username_exists(&credentials.username, pool).await?;
+        let username_taken: bool =  Self::username_exists(&credentials.username, client).await?;
 
         if username_taken {
             return Err(UserDbError::UsernameExists)
         };
 
         let password_hash = hash_password(&credentials.password).await.unwrap();
-
+        // todo: convert to welds query
+        let pool = client.as_sqlx_pool();
         match query_as::<_, UserRow>("INSERT INTO users (username, password_hash) VALUES ( $1,  $2) returning *")
             .bind(credentials.username)
             .bind(password_hash)
@@ -82,13 +75,14 @@ impl UserRow {
             }
         }
     }
-    pub async fn get_by_username(username: String, pool: &PgPool) -> Result<Option<UserRow>, UserDbError> {
-        let username_exists: bool =  Self::username_exists(&username, pool).await?;
+    pub async fn get_by_username(username: String, client: &PostgresClient) -> Result<Option<UserRow>, UserDbError> {
+        let username_exists: bool =  Self::username_exists(&username, client).await?;
 
         if !username_exists {
             return Err(UserDbError::UsernameNotExists)
         };
-        
+        // todo: convert to welds query
+        let pool = client.as_sqlx_pool();
         match query_as::<_, UserRow>("SELECT * FROM users WHERE username = $1")
             .bind(username)
             .fetch_one(pool)
@@ -103,8 +97,8 @@ impl UserRow {
         }
     }
     
-    pub async fn get_by_credentials(credentials: Credentials, pool: &PgPool) -> Result<Option<UserRow>, UserDbError>  {
-        match Self::get_by_username(credentials.username, pool).await {
+    pub async fn get_by_credentials(credentials: Credentials, client: &PostgresClient) -> Result<Option<UserRow>, UserDbError>  {
+        match Self::get_by_username(credentials.username, client).await {
             Ok(Some(u)) => {
                 let expected_hash = PasswordHash::new(&u.password_hash).expect("Unable to hash user password hash");
                 if Argon2::default().verify_password(credentials.password.as_bytes(), &expected_hash).is_ok() {
@@ -142,9 +136,14 @@ impl From<UserRow> for User {
 #[async_trait::async_trait]
 impl Authentication<User, Uuid, PgPool> for User {
     async fn load_user(userid: Uuid, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
-        match UserRow::get_by_id(userid, pool.unwrap()).await {
-            Ok(Some(u)) => {
-                Ok(User::from(u))
+        // because auth_session_axum expects to be using raw sqlx pools we stil have to pass that in.
+        // but because welds wants a client we have to convert it from the pool.
+        let welds_client: PostgresClient = pool.unwrap().clone().into();
+        match UserRow::find_by_id(&welds_client, userid).await {
+            Ok(Some(u)) => {                
+                let user: User = u.into_inner().into();
+                println!("Found user: {user:?}");
+                Ok(user)
             },
             Ok(None) => {
                 Ok(User {
