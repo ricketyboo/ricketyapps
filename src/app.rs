@@ -34,16 +34,16 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 #[server]
 pub async fn check_auth() -> Result<bool, ServerFnError> {
     use axum_session_auth::Authentication;
-    let auth = leptos_axum::extract::<axum_session_auth::AuthSession<crate::app::auth::User, uuid::Uuid, axum_session_sqlx::SessionPgPool, sqlx::PgPool>>().await?;
+    use axum_session_sqlx::SessionPgPool;
+    let auth = leptos_axum::extract::<axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>>().await?;
     let is_logged_in = auth.current_user.is_some_and(|u| u.is_authenticated());
     Ok(is_logged_in)
-    // Err(ServerFnError::new("go away"))
 }
 
 #[server]
 pub async fn logout() -> Result<(), ServerFnError> {
     use axum_session_sqlx::SessionPgPool;
-    let auth = leptos_axum::extract::<axum_session_auth::AuthSession<crate::app::auth::User, uuid::Uuid, axum_session_sqlx::SessionPgPool, sqlx::PgPool>>().await?;
+    let auth = leptos_axum::extract::<axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>>().await?;
     auth.logout_user();
     leptos_axum::redirect("/login");
     Ok(())
