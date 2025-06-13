@@ -4,3 +4,5 @@ pub struct Place {
     id: Uuid,
     name: String,
 }
+
+mod views;

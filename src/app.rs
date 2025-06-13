@@ -11,7 +11,7 @@ use leptos_router::{
 
 pub mod auth;
 
-mod places;
+mod planner;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -95,7 +95,7 @@ pub fn App() -> impl IntoView {
                                                     </p>
                                                     <nav id="main-nav">
                                                         <A href="/">"Home"</A>
-                                                        <A href="/places">"Places"</A>
+                                                        <A href="/planner">"Places"</A>
                                                         <button on:click=move |_| {
                                                             spawn_local(async {
                                                                 logout()
@@ -117,7 +117,7 @@ pub fn App() -> impl IntoView {
                         }
                     >
                         <Route path=path!("") view=HomePage />
-                        <Route path=path!("places") view=PlacePage />
+                        <Route path=path!("planner") view=PlacePage />
                     </ParentRoute>
 
                     // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model
