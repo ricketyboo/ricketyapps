@@ -9,6 +9,7 @@ use thiserror::Error;
 use welds::WeldsModel;
 use welds::connections::postgres::PostgresClient;
 
+// todo: rename this and work out how to avoid confusion between the non SSR User that Auth Uses and this User Entity
 #[derive(sqlx::FromRow, Debug, WeldsModel)]
 #[welds(table = "users")]
 pub struct UserRow {

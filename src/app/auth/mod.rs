@@ -4,7 +4,7 @@ use uuid::Uuid;
 #[cfg(feature = "ssr")]
 mod utils;
 
-mod entity;
+pub(crate) mod entity;
 
 mod views;
 

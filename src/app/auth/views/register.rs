@@ -6,7 +6,7 @@ use leptos_router::components::A;
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
     use crate::app::auth::User;
     use crate::app::auth::entity::user::UserRow;
-    use crate::contexts::use_client;
+    
     use axum::http::StatusCode;
     use axum_session_auth::AuthSession;
     use axum_session_sqlx::SessionPgPool;
@@ -16,6 +16,7 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
 
     use crate::app::auth::entity::user::UserDbError;
 
+    use crate::contexts::use_client;
     let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
 
     let opts = expect_context::<leptos_axum::ResponseOptions>();
