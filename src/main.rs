@@ -20,6 +20,7 @@ async fn main() {
 
     let client = get_client().await;
     let pool = client.as_sqlx_pool();
+    sqlx::migrate!().run(pool).await.expect("Unable to run migrations");
 
     let session_config = SessionConfig::default().with_table_name("sessions");
     // todo: redis sessions instead of pg
