@@ -21,6 +21,7 @@ Previous version was using Welds and was API only.
 Install tooling
 
 ```shell
+rustup target add wasm32-unknown-unknown
 cargo install sqlx-cli
 cargo install --locked cargo-leptos
 ```
