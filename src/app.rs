@@ -116,7 +116,11 @@ pub fn App() -> impl IntoView {
                                 set_navigated(Some(url().path().to_string()));
                             });
                             // todo: go back to home if here and logged in already
-                            view! { <Outlet /> }
+                            view! {
+                                <div id="auth-layout" class="root-layout">
+                                    <Outlet />
+                                </div>
+                            }
                         }
                     >
                         <Route path=path!("login") view=Login />

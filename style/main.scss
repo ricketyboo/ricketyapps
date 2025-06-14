@@ -24,11 +24,6 @@ body {
 	align-items: center;
 }
 
-.buttons {
-	display: flex;
-	justify-content: space-evenly;
-}
-
 h1,
 h2,
 h3,
@@ -40,40 +35,11 @@ h6 {
 	padding: 2rem;
 }
 
-button {
-	margin: var(--size-6);
-}
-
-button {
-	display: block;
-	text-align: center;
-	margin: 2rem auto;
-}
-
 #main-nav {
 	display: flex;
 	a {
 		padding: 1rem;
 	}
-}
-
-form label {
-	display: block;
-	margin-bottom: 1rem;
-}
-
-body {
-	//display: flex;
-	//flex-direction: column;
-}
-
-main {
-	//display: flex;
-	//flex: auto;
-}
-
-.root-layout {
-	flex: 1 1 auto;
 }
 
 #app-layout {
@@ -82,4 +48,19 @@ main {
 
 #auth-layout {
 	border: 1px solid #f00;
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+		align-items: center;
+		:where(small) {
+			max-inline-size: unset;
+		}
+	}
+}
+
+label:has(input) {
+	display: flex;
+	flex-direction: column;
+	align-items: start;
 }
