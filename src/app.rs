@@ -10,6 +10,7 @@ use leptos_router::{
 };
 
 use crate::app::planner::views::TripIndex;
+use crate::app::planner::views::TripDetailView;
 
 pub mod auth;
 
@@ -103,7 +104,10 @@ pub fn App() -> impl IntoView {
                         }
                     >
                         <Route path=path!("") view=HomePage />
-                        <Route path=path!("trips") view=TripIndex />
+                        <ParentRoute path=path!("trips") view=TripIndex>
+                            <Route path=path!("") view=move||  {  } />
+                            <Route path=path!(":id") view=TripDetailView />
+                        </ParentRoute>
                     </ParentRoute>
 
                     // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model
