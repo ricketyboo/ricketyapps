@@ -7,7 +7,7 @@ CREATE TABLE users
     updated_at    TIMESTAMPTZ NULL
 );
 
-CREATE TRIGGER update_users_modtime
+CREATE TRIGGER set_updated_at
     BEFORE UPDATE
     ON users
     FOR EACH ROW
