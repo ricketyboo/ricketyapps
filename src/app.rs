@@ -1,6 +1,6 @@
-use crate::app::auth::routes::{Login, Register};
+use crate::app::auth::routes::{Login, Logout, Register};
 use leptos::prelude::*;
-use leptos::reactive::spawn_local;
+
 use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
 use leptos_router::components::{A, Outlet, ParentRoute, Redirect, Route};
 use leptos_router::hooks::use_url;
@@ -8,6 +8,7 @@ use leptos_router::{
     components::{Router, Routes},
     path,
 };
+
 use crate::app::planner::views::TripIndex;
 
 pub mod auth;
@@ -44,17 +45,7 @@ pub async fn check_auth() -> Result<bool, ServerFnError> {
     Ok(is_logged_in)
 }
 
-#[server]
-pub async fn logout() -> Result<(), ServerFnError> {
-    use axum_session_sqlx::SessionPgPool;
-    let auth = leptos_axum::extract::<
-        axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>,
-    >()
-    .await?;
-    auth.logout_user();
-    leptos_axum::redirect("/login");
-    Ok(())
-}
+
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -96,25 +87,13 @@ pub fn App() -> impl IntoView {
                                                 when=move || { is_logged_in }
                                                 fallback=move || view! { <Redirect path="/login" /> }
                                             >
-                                                <div id="app-layout" class="root-layout" style="">
-                                                    <p>
-                                                        <small>"app layout"{is_logged_in}</small>
-                                                    </p>
+                                                <div id="app-layout" class="root-layout">
                                                     <nav id="main-nav">
                                                         <A href="/">"Home"</A>
                                                         <A href="/trips">"Trips"</A>
-                                                        <button on:click=move |_| {
-                                                            spawn_local(async {
-                                                                logout()
-                                                                    .await
-                                                                    .expect("Couldn't log out. What does this mean?");
-                                                            });
-                                                        }>"Logout"</button>
+                                                        <A href="/logout">"Logout"</A>
                                                     </nav>
                                                     <Outlet />
-                                                    <p>
-                                                        <small>"end app layout"</small>
-                                                    </p>
                                                 </div>
                                             </Show>
                                         }
@@ -142,6 +121,7 @@ pub fn App() -> impl IntoView {
                     >
                         <Route path=path!("login") view=Login />
                         <Route path=path!("register") view=Register />
+                        <Route path=path!("logout") view=Logout />
                     </ParentRoute>
                 </Routes>
             </main>

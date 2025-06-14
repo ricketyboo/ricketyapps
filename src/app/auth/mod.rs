@@ -11,6 +11,7 @@ mod views;
 pub mod routes {
     pub use super::views::Login;
     pub use super::views::Register;
+    pub use super::views::Logout;
 
     // #[component(transparent)]
     // pub fn AuthRoutes(logged_in: ReadSignal<bool>) -> impl MatchNestedRoutes + Clone {
