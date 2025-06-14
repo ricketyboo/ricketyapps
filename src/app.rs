@@ -8,6 +8,7 @@ use leptos_router::{
     components::{Router, Routes},
     path,
 };
+use crate::app::planner::views::TripIndex;
 
 pub mod auth;
 
@@ -70,7 +71,7 @@ pub fn App() -> impl IntoView {
         <Stylesheet id="leptos" href="/pkg/rickety-apps.css" />
 
         // sets the document title
-        <Title text="Welcome to Leptos" />
+        <Title text="Welcome to Planner" />
 
         // content for this welcome page
         <Router>
@@ -101,7 +102,7 @@ pub fn App() -> impl IntoView {
                                                     </p>
                                                     <nav id="main-nav">
                                                         <A href="/">"Home"</A>
-                                                        <A href="/planner">"Places"</A>
+                                                        <A href="/trips">"Trips"</A>
                                                         <button on:click=move |_| {
                                                             spawn_local(async {
                                                                 logout()
@@ -123,7 +124,7 @@ pub fn App() -> impl IntoView {
                         }
                     >
                         <Route path=path!("") view=HomePage />
-                        <Route path=path!("planner") view=PlacePage />
+                        <Route path=path!("trips") view=TripIndex />
                     </ParentRoute>
 
                     // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model

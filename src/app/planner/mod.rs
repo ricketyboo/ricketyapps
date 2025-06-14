@@ -1,8 +1,11 @@
-use uuid::Uuid;
+
 
 pub struct Place {
     id: Uuid,
     name: String,
 }
 
-mod views;
+pub mod views;
+
+#[cfg(feature = "ssr")]
+mod entity;
