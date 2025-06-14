@@ -1,5 +1,3 @@
-
-
 CREATE TABLE users
 (
     id            UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
@@ -10,5 +8,7 @@ CREATE TABLE users
 );
 
 CREATE TRIGGER update_users_modtime
-    BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_modified_column();
+    BEFORE UPDATE
+    ON users
+    FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
