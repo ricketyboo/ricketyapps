@@ -17,28 +17,36 @@ pub fn TripDetailView() -> impl IntoView {
 
     view! {
         <Suspense fallback=move||view! {<p>Loading...</p>}>
-            {move || Suspend::new(async move {
-                let trip = details.await.unwrap();
-                view! {
-                    <p>Details</p>
-                    <p>Name: {trip.name}</p>
-                }
-            })}
+            <ErrorBoundary fallback=|_| view! { "Error" }>
+                {move || Suspend::new(async move {
+                    match details.await {
+                        Ok(trip) => {
+                            view! {
+                                <p>Details</p>
+                                <p>Name: {trip.name}</p>
+                            }.into_any()
+                        }
+                        Err(_) => {
+                            view! {
+                                <p>Details</p>
+                                <p>Unable to load</p>
+                            }.into_any()
+                        }}
+                })}
+            </ErrorBoundary>
         </Suspense>
     }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct TripDetails {
-    name: String
+    name: String,
 }
 
 #[cfg(feature = "ssr")]
 impl From<Trip> for TripDetails {
     fn from(value: Trip) -> Self {
-        Self {
-            name: value.name
-        }
+        Self { name: value.name }
     }
 }
 
@@ -48,6 +56,19 @@ async fn get_trip(id: Uuid) -> Result<TripDetails, ServerFnError> {
     use crate::contexts::use_client;
     let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
 
+    use axum_session_auth::AuthSession;
+    use axum_session_sqlx::SessionPgPool;
+    use sqlx::PgPool;
+    use uuid::Uuid;
+    let auth = leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
+
+    use crate::app::auth::User;
+    let user = auth.current_user.expect("No active user");
+
     let trip = Trip::find_by_id(&client, id).await?.expect("No row");
+    if trip.owner_id.ne(&user.id) {
+        return Err(ServerFnError::new("No access"));
+    }
+
     Ok(trip.into_inner().into())
 }
