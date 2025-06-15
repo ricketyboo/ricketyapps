@@ -20,32 +20,36 @@ struct CreateTripPayload {
 
 #[server]
 async fn create_trip(payload: CreateTripPayload) -> Result<(), ServerFnError> {
-    println!("create_trip: {payload:?}");
+    // todo: tracing
+    // println!("create_trip: {payload:?}");
 
-    use crate::contexts::use_client;
-    let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
+    use crate::app::auth::utils::get_current_user;
+    let current_user = get_current_user()
+        .await
+        .map_err(|_| ServerFnError::new("Unable to check current user auth"))?;
 
-    use crate::app::auth::User;
-    use axum_session_auth::AuthSession;
-    use axum_session_sqlx::SessionPgPool;
-    use sqlx::PgPool;
-    use uuid::Uuid;
-    let auth = leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
+    match current_user {
+        Some(user) => {
+            use crate::contexts::use_client;
+            let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
+            
+            use crate::app::planner::entity::Trip;
+            let mut model = Trip::new();
 
-    if let Some(current_user) = auth.current_user {
-        let owner_id = current_user.id;
+            model.name = payload.name;
+            model.owner_id = user.id;
 
-        use crate::app::planner::entity::Trip;
-        let mut model = Trip::new();
+            model.save(&client).await?;
 
-        model.name = payload.name;
-        model.owner_id = owner_id;
+            leptos_axum::redirect(&format!("/trips/{}", model.id));
 
-        model.save(&client).await?;
-
-        leptos_axum::redirect(&format!("/trips/{}", model.id));
-
-        return Ok(());
+            Ok(())
+        }
+        None => {
+            use axum::http::StatusCode;
+            let opts = expect_context::<leptos_axum::ResponseOptions>();
+            opts.set_status(StatusCode::UNAUTHORIZED);
+            Err(ServerFnError::new("No current user"))
+        }
     }
-    Err(ServerFnError::new("No user"))
 }

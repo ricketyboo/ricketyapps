@@ -35,6 +35,7 @@ struct TripListItem {
 
 #[cfg(feature = "ssr")]
 use crate::app::planner::entity::Trip;
+
 #[cfg(feature = "ssr")]
 impl From<Trip> for TripListItem {
     fn from(value: Trip) -> Self {
@@ -47,28 +48,31 @@ impl From<Trip> for TripListItem {
 
 #[server]
 async fn get_trips() -> Result<Vec<TripListItem>, ServerFnError> {
-    use welds::prelude::*;
+    use crate::app::auth::utils::get_current_user;
+    let current_user = get_current_user()
+        .await
+        .map_err(|_| ServerFnError::new("Unable to check current user auth"))?;
 
-    use crate::app::auth::User;
-
-    use crate::contexts::use_client;
-    let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
-
-    use axum_session_auth::AuthSession;
-    use axum_session_sqlx::SessionPgPool;
-    use sqlx::PgPool;
-    use uuid::Uuid;
-    let auth = leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
-
-    let user = auth.current_user.expect("No active user");
-
-    let trips = Trip::where_col(|t| t.owner_id.equal(user.id))
-        .run(&client)
-        .await?;
-    let trip_list = trips
-        .into_inners()
-        .into_iter()
-        .map(TripListItem::from)
-        .collect();
-    Ok(trip_list)
+    match current_user {
+        Some(user) => {
+            use crate::contexts::use_client;
+            use welds::prelude::*;
+            let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
+            let trips = Trip::where_col(|t| t.owner_id.equal(user.id))
+                .run(&client)
+                .await?;
+            let trip_list = trips
+                .into_inners()
+                .into_iter()
+                .map(TripListItem::from)
+                .collect();
+            Ok(trip_list)
+        }
+        None => {
+            use axum::http::StatusCode;
+            let opts = expect_context::<leptos_axum::ResponseOptions>();
+            opts.set_status(StatusCode::UNAUTHORIZED);
+            Err(ServerFnError::new("No current user"))
+        }
+    }
 }

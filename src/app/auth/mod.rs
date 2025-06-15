@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[cfg(feature = "ssr")]
-mod utils;
+pub(crate) mod utils;
 
 pub(crate) mod entity;
 

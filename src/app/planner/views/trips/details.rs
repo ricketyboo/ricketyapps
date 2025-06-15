@@ -26,10 +26,10 @@ pub fn TripDetailView() -> impl IntoView {
                                 <p>Name: {trip.name}</p>
                             }.into_any()
                         }
-                        Err(_) => {
+                        Err(e) => {
                             view! {
                                 <p>Details</p>
-                                <p>Unable to load</p>
+                                <p>{e.to_string()}</p>
                             }.into_any()
                         }}
                 })}
@@ -52,23 +52,33 @@ impl From<Trip> for TripDetails {
 
 #[server]
 async fn get_trip(id: Uuid) -> Result<TripDetails, ServerFnError> {
-    println!("get_trip: {id:?}");
-    use crate::contexts::use_client;
-    let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
+    // todo: tracing
+    // println!("get_trip: {id:?}");
 
-    use axum_session_auth::AuthSession;
-    use axum_session_sqlx::SessionPgPool;
-    use sqlx::PgPool;
-    use uuid::Uuid;
-    let auth = leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
+    use crate::app::auth::utils::get_current_user;
+    let current_user = get_current_user()
+        .await
+        .map_err(|_| ServerFnError::new("Unable to check current user auth"))?;
 
-    use crate::app::auth::User;
-    let user = auth.current_user.expect("No active user");
+    match current_user {
+        Some(user) => {
+            use crate::contexts::use_client;
+            let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
 
-    let trip = Trip::find_by_id(&client, id).await?.expect("No row");
-    if trip.owner_id.ne(&user.id) {
-        return Err(ServerFnError::new("No access"));
+            let trip = Trip::find_by_id(&client, id).await?.expect("No row");
+            if trip.owner_id.ne(&user.id) {
+                use axum::http::StatusCode;
+                let opts = expect_context::<leptos_axum::ResponseOptions>();
+                opts.set_status(StatusCode::FORBIDDEN);
+                return Err(ServerFnError::new("No access"));
+            }
+            Ok(trip.into_inner().into())
+        }
+        None => {
+            use axum::http::StatusCode;
+            let opts = expect_context::<leptos_axum::ResponseOptions>();
+            opts.set_status(StatusCode::UNAUTHORIZED);
+            Err(ServerFnError::new("No current user"))
+        }
     }
-
-    Ok(trip.into_inner().into())
 }
