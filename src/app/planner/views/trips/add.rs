@@ -43,7 +43,7 @@ async fn create_trip(payload: CreateTripPayload) -> Result<(), ServerFnError> {
 
         model.save(&client).await?;
 
-        // leptos_axum::redirect(&format!("/trips/{}", model.id));
+        leptos_axum::redirect(&format!("/trips/{}", model.id));
 
         return Ok(());
     }
