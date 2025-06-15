@@ -30,8 +30,8 @@ CREATE TABLE trip_accommodation_booking
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     trip_id          UUID        NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
     accommodation_id UUID        NOT NULL REFERENCES accommodations (id) ON DELETE CASCADE,
-    check_in         TIMESTAMPTZ NULL,
-    check_out        TIMESTAMPTZ NULL
+    check_in         TIMESTAMPTZ NOT NULL,
+    check_out        TIMESTAMPTZ NOT NULL
 );
 
 CREATE TRIGGER set_updated_at
