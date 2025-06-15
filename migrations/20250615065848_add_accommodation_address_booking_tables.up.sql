@@ -31,8 +31,7 @@ CREATE TABLE trip_accommodation_booking
     trip_id          UUID        NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
     accommodation_id UUID        NOT NULL REFERENCES accommodations (id) ON DELETE CASCADE,
     check_in         TIMESTAMPTZ NULL,
-    check_out        TIMESTAMPTZ NULL,
-    UNIQUE (trip_id, accommodation_id)
+    check_out        TIMESTAMPTZ NULL
 );
 
 CREATE TRIGGER set_updated_at
