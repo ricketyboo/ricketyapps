@@ -7,7 +7,7 @@ pub(super) fn AddTrip() -> impl IntoView {
     view! {
         <p>"Add Trip"</p>
         <ActionForm action>
-            <label>"Name"<input name="payload[name]"/></label>
+            <label>"Name"<input name="payload[name]" /></label>
             <button type="submit">Save</button>
         </ActionForm>
     }

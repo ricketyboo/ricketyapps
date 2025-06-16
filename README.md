@@ -35,7 +35,7 @@ podman logs postgres
 Connect to postgres and create the new app database.
 
 ```postgresql
-CREATE DATABASE planner_dev;
+CREATE DATABASE rickety_apps_dev;
 ```
 
 Reconnect to newly created database and add extensions.
@@ -47,13 +47,13 @@ CREATE EXTENSION IF NOT EXISTS moddatetime;
 
 ```postgresql
 -- create user for the app_helpers
-CREATE USER planner WITH password 'planner_pass';
-GRANT ALL PRIVILEGES ON DATABASE planner_dev TO planner;
-ALTER DATABASE planner_dev OWNER TO planner;
+CREATE USER rickety_apps WITH password 'rickety_apps_pass';
+GRANT ALL PRIVILEGES ON DATABASE rickety_apps_dev TO rickety_apps;
+ALTER DATABASE rickety_apps_dev OWNER TO rickety_apps;
 -- check our user was created
 SELECT usename, usesysid
 FROM pg_user
-WHERE usename = 'planner';
+WHERE usename = 'rickety_apps';
 ```
 
 Reconnect with app credentials.
@@ -61,11 +61,11 @@ Reconnect with app credentials.
 Create environment file
 
 ```text
-DB_USERNAME=planner
-DB_PASSWORD=planner_pass
+DB_USERNAME=rickety_apps
+DB_PASSWORD=rickety_apps_pass
 DB_HOST=127.0.0.1
 DB_PORT=5432
-DB_NAME=planner_dev
+DB_NAME=rickety_apps_dev
 
 # SQLX
 DATABASE_URL=postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}

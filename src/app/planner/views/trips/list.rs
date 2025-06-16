@@ -7,20 +7,24 @@ use uuid::Uuid;
 pub(super) fn TripList() -> impl IntoView {
     let items = OnceResource::new(get_trips());
     view! {
-        <Suspense fallback=move||view! {<p>Loading</p>}>
+        <Suspense fallback=move || {
+            view! { <p>Loading</p> }
+        }>
             {move || Suspend::new(async move {
                 if let Ok(trips) = items.await {
+
                     view! {
                         <ul>
                             <For each=move || trips.clone() key=|trip| trip.id let(trip)>
-                                <li><A href=trip.id.to_string()>{trip.name}</A></li>
+                                <li>
+                                    <A href=trip.id.to_string()>{trip.name}</A>
+                                </li>
                             </For>
                         </ul>
-                    }.into_any()
+                    }
+                        .into_any()
                 } else {
-                    view! {
-                        <ul/>
-                    }.into_any()
+                    view! { <ul /> }.into_any()
                 }
             })}
         </Suspense>

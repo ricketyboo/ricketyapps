@@ -16,22 +16,27 @@ pub fn TripDetailView() -> impl IntoView {
     );
 
     view! {
-        <Suspense fallback=move||view! {<p>Loading...</p>}>
-            <ErrorBoundary fallback=|_| view! { "Error" }>
+        <Suspense fallback=move || view! { <p>Loading...</p> }>
+            <ErrorBoundary fallback=|_| {
+                view! { "Error" }
+            }>
                 {move || Suspend::new(async move {
                     match details.await {
                         Ok(trip) => {
                             view! {
                                 <p>Details</p>
                                 <p>Name: {trip.name}</p>
-                            }.into_any()
+                            }
+                                .into_any()
                         }
                         Err(e) => {
                             view! {
                                 <p>Details</p>
                                 <p>{e.to_string()}</p>
-                            }.into_any()
-                        }}
+                            }
+                                .into_any()
+                        }
+                    }
                 })}
             </ErrorBoundary>
         </Suspense>

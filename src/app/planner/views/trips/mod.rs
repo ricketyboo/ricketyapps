@@ -14,7 +14,7 @@ pub fn TripIndex() -> impl IntoView {
     view! {
         <h1>Trips</h1>
         <TripList />
-        <AddTrip/>
+        <AddTrip />
         <Outlet />
     }
 }
