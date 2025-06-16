@@ -9,12 +9,7 @@ use leptos_router::{
     path,
 };
 
-use crate::app::planner::views::TripIndex;
-use crate::app::planner::views::TripDetailView;
-
 pub mod auth;
-
-mod planner;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -45,8 +40,6 @@ pub async fn check_auth() -> Result<bool, ServerFnError> {
     let is_logged_in = auth.current_user.is_some_and(|u| u.is_authenticated());
     Ok(is_logged_in)
 }
-
-
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -91,7 +84,7 @@ pub fn App() -> impl IntoView {
                                                 <div id="app-layout" class="root-layout">
                                                     <nav id="main-nav">
                                                         <A href="/">"Home"</A>
-                                                        <A href="/trips">"Trips"</A>
+
                                                         <A href="/logout">"Logout"</A>
                                                     </nav>
                                                     <Outlet />
@@ -104,10 +97,6 @@ pub fn App() -> impl IntoView {
                         }
                     >
                         <Route path=path!("") view=HomePage />
-                        <ParentRoute path=path!("trips") view=TripIndex>
-                            <Route path=path!("") view=move || {} />
-                            <Route path=path!(":id") view=TripDetailView />
-                        </ParentRoute>
                     </ParentRoute>
 
                     // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model
@@ -147,13 +136,5 @@ fn HomePage() -> impl IntoView {
     view! {
         <h1>"Welcome to Leptos!"</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
-    }
-}
-
-#[component]
-fn PlacePage() -> impl IntoView {
-    view! {
-        <h1>"Places!"</h1>
-        <p>Todo</p>
     }
 }

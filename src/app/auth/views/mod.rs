@@ -1,7 +1,7 @@
 mod login;
-mod register;
 mod logout;
+mod register;
 
 pub use login::Login;
-pub use register::Register;
 pub use logout::Logout;
+pub use register::Register;
