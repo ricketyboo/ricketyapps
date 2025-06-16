@@ -15,6 +15,7 @@ pub struct Trip {
 
 #[derive(Debug, WeldsModel)]
 #[welds(table = "addresses")]
+#[welds(BelongsTo(owner, UserRow, "owner_id"))]
 pub struct Address {
     #[welds(primary_key)]
     id: Uuid,
@@ -32,12 +33,13 @@ pub struct Address {
 
 #[derive(Debug, WeldsModel)]
 #[welds(table = "accommodations")]
+#[welds(BelongsTo(owner, UserRow, "owner_id"))]
 pub struct Accommodation {
     #[welds(primary_key)]
     id: Uuid,
     owner_id: Uuid,
     name: String,
-    address_id: String,
+    address_id: Uuid,
     created_at: chrono::DateTime<chrono::Utc>,
     updated_at: chrono::DateTime<chrono::Utc>,
 }
@@ -51,3 +53,13 @@ pub struct TripAccommodationBooking {
     check_in: chrono::DateTime<chrono::Utc>,
     check_out: chrono::DateTime<chrono::Utc>,
 }
+
+// pub struct Destination {
+//     id: Uuid,
+//     name: String,
+// }
+//
+// pub struct Event {
+//     id: Uuid,
+//     name: String,
+// }
