@@ -60,7 +60,7 @@ pub fn App() -> impl IntoView {
     view! {
         // injects a stylesheet into the document <head>
         // id=leptos means cargo-leptos will hot-reload this stylesheet
-        <Stylesheet id="leptos" href="/pkg/rickety-apps.css" />
+        <Stylesheet id="leptos" href="/pkg/rickety-trip.css" />
 
         // sets the document title
         <Title text="Welcome to Planner" />
@@ -105,7 +105,7 @@ pub fn App() -> impl IntoView {
                     >
                         <Route path=path!("") view=HomePage />
                         <ParentRoute path=path!("trips") view=TripIndex>
-                            <Route path=path!("") view=move||  {  } />
+                            <Route path=path!("") view=move || {} />
                             <Route path=path!(":id") view=TripDetailView />
                         </ParentRoute>
                     </ParentRoute>

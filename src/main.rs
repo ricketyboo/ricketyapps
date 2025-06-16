@@ -10,13 +10,13 @@ async fn main() {
     use leptos::logging::log;
     use leptos::prelude::*;
     use leptos_axum::{LeptosRoutes, generate_route_list};
-    use rickety_apps::app::*;
-    use rickety_apps::db::get_client;
-    use rickety_apps::state::AppState;
+    use rickety_trip::app::*;
+    use rickety_trip::db::get_client;
+    use rickety_trip::state::AppState;
     use sqlx::PgPool;
     use uuid::Uuid;
 
-    use rickety_apps::app::auth::*;
+    use rickety_trip::app::auth::*;
 
     let client = get_client().await;
     let pool = client.as_sqlx_pool();

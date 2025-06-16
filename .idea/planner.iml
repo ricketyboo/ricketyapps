@@ -3,22 +3,22 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/api/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/models/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/db/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/bin/api/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/domains/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/frontend-csr/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/app_helpers/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/bin/api/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/core/app_helpers/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/core/db/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/views/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/db/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/models/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ugh/app/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ugh/frontend/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ugh/modules/places/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ugh/modules/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ugh/rickety/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ugh/server/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/views/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/ugh" />
     </content>
