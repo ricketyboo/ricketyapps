@@ -10,7 +10,12 @@ pub async fn logout() -> Result<(), ServerFnError> {
     use crate::auth;
     use axum_session_sqlx::SessionPgPool;
     let auth = leptos_axum::extract::<
-        axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>,
+        axum_session_auth::AuthSession<
+            auth::AuthSessionUser,
+            uuid::Uuid,
+            SessionPgPool,
+            sqlx::PgPool,
+        >,
     >()
     .await?;
     auth.logout_user();

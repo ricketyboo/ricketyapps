@@ -51,7 +51,7 @@ pub mod routes {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct User {
+pub struct AuthSessionUser {
     pub id: Uuid,
     pub username: String,
     pub anonymous: bool,

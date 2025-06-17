@@ -51,8 +51,10 @@ async fn main() {
         })
         .fallback(leptos_axum::file_and_error_handler::<AppState, _>(shell))
         .layer(
-            AuthSessionLayer::<User, Uuid, SessionPgPool, PgPool>::new(Some(pool.clone()))
-                .with_config(auth_config),
+            AuthSessionLayer::<AuthSessionUser, Uuid, SessionPgPool, PgPool>::new(Some(
+                pool.clone(),
+            ))
+            .with_config(auth_config),
         )
         .layer(SessionLayer::new(session_store))
         .with_state(app_state);

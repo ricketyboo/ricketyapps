@@ -1,5 +1,5 @@
 use crate::auth::utils::hash_password;
-use crate::auth::{Credentials, User};
+use crate::auth::{AuthSessionUser, Credentials};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum_session_auth::Authentication;
 use sqlx::PgPool;
@@ -9,10 +9,9 @@ use thiserror::Error;
 use welds::WeldsModel;
 use welds::connections::postgres::PostgresClient;
 
-// todo: rename this and work out how to avoid confusion between the non SSR User that Auth Uses and this User Entity
 #[derive(sqlx::FromRow, Debug, WeldsModel)]
 #[welds(table = "users")]
-pub struct UserRow {
+pub struct User {
     #[welds(primary_key)]
     pub(crate) id: Uuid,
     username: String,
@@ -36,7 +35,7 @@ pub enum UserDbError {
     // - Validation failed Password strength
 }
 
-impl UserRow {
+impl User {
     async fn username_exists(username: &str, client: &PostgresClient) -> Result<bool, UserDbError> {
         let username_exists: bool =
             sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)")
@@ -52,7 +51,7 @@ impl UserRow {
     pub async fn create(
         credentials: Credentials,
         client: &PostgresClient,
-    ) -> Result<UserRow, UserDbError> {
+    ) -> Result<User, UserDbError> {
         // todo: validations
         //  - no empty values
         //  - minimum pw length/strength validations
@@ -64,7 +63,7 @@ impl UserRow {
         };
 
         let password_hash = hash_password(&credentials.password).await.unwrap();
-        let mut model = UserRow::new();
+        let mut model = User::new();
         model.username = credentials.username;
         model.password_hash = password_hash;
         match model.save(client).await {
@@ -78,13 +77,13 @@ impl UserRow {
     pub async fn get_by_username(
         username: String,
         client: &PostgresClient,
-    ) -> Result<Option<UserRow>, UserDbError> {
+    ) -> Result<Option<User>, UserDbError> {
         let username_exists: bool = Self::username_exists(&username, client).await?;
 
         if !username_exists {
             return Err(UserDbError::UsernameNotExists);
         };
-        match UserRow::where_col(move |u| u.username.equal(username.clone()))
+        match User::where_col(move |u| u.username.equal(username.clone()))
             .fetch_one(client)
             .await
         {
@@ -99,7 +98,7 @@ impl UserRow {
     pub async fn get_by_credentials(
         credentials: Credentials,
         client: &PostgresClient,
-    ) -> Result<Option<User>, UserDbError> {
+    ) -> Result<Option<AuthSessionUser>, UserDbError> {
         match Self::get_by_username(credentials.username, client).await {
             Ok(Some(u)) => {
                 let expected_hash =
@@ -108,7 +107,7 @@ impl UserRow {
                     .verify_password(credentials.password.as_bytes(), &expected_hash)
                     .is_ok()
                 {
-                    return Ok(Some(User::from(u)));
+                    return Ok(Some(AuthSessionUser::from(u)));
                 }
                 Ok(None)
             }
@@ -127,8 +126,8 @@ impl UserRow {
     }
 }
 
-impl From<UserRow> for User {
-    fn from(value: UserRow) -> Self {
+impl From<User> for AuthSessionUser {
+    fn from(value: User) -> Self {
         Self {
             id: value.id,
             username: value.username,
@@ -138,14 +137,17 @@ impl From<UserRow> for User {
 }
 
 #[async_trait::async_trait]
-impl Authentication<User, Uuid, PgPool> for User {
-    async fn load_user(userid: Uuid, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
+impl Authentication<AuthSessionUser, Uuid, PgPool> for AuthSessionUser {
+    async fn load_user(
+        userid: Uuid,
+        pool: Option<&PgPool>,
+    ) -> Result<AuthSessionUser, anyhow::Error> {
         // because auth_session_axum expects to be using raw sqlx pools we still have to pass that in.
         // but because welds wants a client we have to convert it from the pool.
         let welds_client: PostgresClient = pool.unwrap().clone().into();
-        match UserRow::find_by_id(&welds_client, userid).await {
+        match User::find_by_id(&welds_client, userid).await {
             Ok(Some(u)) => Ok(u.into_inner().into()),
-            Ok(None) => Ok(User {
+            Ok(None) => Ok(AuthSessionUser {
                 id: Uuid::nil(),
                 username: String::from(""),
                 anonymous: true,

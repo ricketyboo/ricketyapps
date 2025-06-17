@@ -42,8 +42,8 @@ pub fn Login() -> impl IntoView {
 
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError> {
+    use crate::auth::entity::user::User;
     use crate::auth::entity::user::UserDbError;
-    use crate::auth::entity::user::UserRow;
     use crate::auth::utils::session::get_auth_session;
     use crate::ssr::contexts::use_client;
     use axum::http::StatusCode;
@@ -52,7 +52,7 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
 
     let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
 
-    match UserRow::get_by_credentials(credentials, &client).await {
+    match User::get_by_credentials(credentials, &client).await {
         Ok(Some(u)) => {
             let auth = get_auth_session().await?;
 

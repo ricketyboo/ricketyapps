@@ -22,7 +22,7 @@ pub async fn hash_password(password: &str) -> Result<String, &'static str> {
 }
 
 pub mod session {
-    use crate::auth::User;
+    use crate::auth::AuthSessionUser;
     use axum_session_auth::AuthSession;
     use axum_session_auth::Authentication;
     use axum_session_sqlx::SessionPgPool;
@@ -31,11 +31,11 @@ pub mod session {
     use uuid::Uuid;
 
     pub async fn get_auth_session()
-    -> Result<AuthSession<User, Uuid, SessionPgPool, PgPool>, ServerFnErrorErr> {
-        leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await
+    -> Result<AuthSession<AuthSessionUser, Uuid, SessionPgPool, PgPool>, ServerFnErrorErr> {
+        leptos_axum::extract::<AuthSession<AuthSessionUser, Uuid, SessionPgPool, PgPool>>().await
     }
 
-    pub async fn get_current_user() -> Result<Option<User>, ServerFnErrorErr> {
+    pub async fn get_current_user() -> Result<Option<AuthSessionUser>, ServerFnErrorErr> {
         let auth_session = get_auth_session().await?;
         Ok(auth_session.current_user)
     }

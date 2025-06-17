@@ -41,8 +41,8 @@ pub fn Register() -> impl IntoView {
 
 #[server]
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
+    use crate::auth::entity::user::User;
     use crate::auth::entity::user::UserDbError;
-    use crate::auth::entity::user::UserRow;
     use crate::auth::utils::session::get_auth_session;
     use crate::ssr::contexts::use_client;
     use axum::http::StatusCode;
@@ -52,7 +52,7 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
 
     let opts = expect_context::<leptos_axum::ResponseOptions>();
 
-    match UserRow::create(credentials, &client).await {
+    match User::create(credentials, &client).await {
         Ok(user_row) => {
             opts.set_status(StatusCode::CREATED);
 
