@@ -1,0 +1,8 @@
+[package]
+name = "core-libs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+secrecy = "0.10"
+welds = { version = "0.4", features = ["postgres"] }

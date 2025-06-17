@@ -1,26 +1,24 @@
-#[cfg(feature = "ssr")]
+use axum::Router;
+use axum_session::{SessionConfig, SessionLayer, SessionStore};
+use axum_session_auth::{AuthConfig, AuthSessionLayer};
+use axum_session_sqlx::SessionPgPool;
+use leptos::logging::log;
+use leptos::prelude::*;
+use leptos_app::app::*;
+use leptos_app::state::AppState;
+use leptos_axum::{LeptosRoutes, generate_route_list};
+use sqlx::PgPool;
+use uuid::Uuid;
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().expect(".env file not found");
 
-    use axum::Router;
-    use axum_session::{SessionConfig, SessionLayer, SessionStore};
-    use axum_session_auth::{AuthConfig, AuthSessionLayer};
-    use axum_session_sqlx::SessionPgPool;
-    use leptos::logging::log;
-    use leptos::prelude::*;
-    use leptos_axum::{LeptosRoutes, generate_route_list};
-    use rickety_apps::app::*;
-    use rickety_apps::db::get_client;
-    use rickety_apps::state::AppState;
-    use sqlx::PgPool;
-    use uuid::Uuid;
+    use leptos_app::app::auth::*;
 
-    use rickety_apps::app::auth::*;
-
-    let client = get_client().await;
+    let client = core_libs::db::get_client().await;
     let pool = client.as_sqlx_pool();
-    sqlx::migrate!()
+    sqlx::migrate!("../migrations")
         .run(pool)
         .await
         .expect("Unable to run migrations");
@@ -66,11 +64,4 @@ async fn main() {
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
-}
-
-#[cfg(not(feature = "ssr"))]
-pub fn main() {
-    // no client-side main function
-    // unless we want this to work with e.g., Trunk for pure client-side testing
-    // see lib.rs for hydration function instead
 }

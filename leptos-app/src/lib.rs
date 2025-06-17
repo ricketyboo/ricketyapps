@@ -3,9 +3,6 @@ pub mod app;
 #[cfg(feature = "ssr")]
 pub mod state;
 
-#[cfg(feature = "ssr")]
-pub mod db;
-
 pub mod contexts;
 
 #[cfg(feature = "hydrate")]
