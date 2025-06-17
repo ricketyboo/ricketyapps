@@ -1,5 +1,5 @@
-use crate::app::auth::utils::hash_password;
-use crate::app::auth::{Credentials, User};
+use crate::auth::utils::hash_password;
+use crate::auth::{Credentials, User};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum_session_auth::Authentication;
 use sqlx::PgPool;

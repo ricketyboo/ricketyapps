@@ -1,11 +1,11 @@
-use crate::app::auth::Credentials;
+use crate::auth::Credentials;
 use leptos::prelude::*;
 use leptos_router::components::A;
 
 #[server]
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
-    use crate::app::auth::User;
-    use crate::app::auth::entity::user::UserRow;
+    use crate::auth::User;
+    use crate::auth::entity::user::UserRow;
 
     use axum::http::StatusCode;
     use axum_session_auth::AuthSession;
@@ -14,7 +14,7 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
     use sqlx::PgPool;
     use uuid::Uuid;
 
-    use crate::app::auth::entity::user::UserDbError;
+    use crate::auth::entity::user::UserDbError;
 
     use crate::contexts::use_client;
     let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;

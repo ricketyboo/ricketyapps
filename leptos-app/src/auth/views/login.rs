@@ -1,12 +1,12 @@
-use crate::app::auth::Credentials;
+use crate::auth::Credentials;
 use leptos::prelude::*;
 use leptos_router::components::A;
 
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError> {
-    use crate::app::auth::User;
-    use crate::app::auth::entity::user::UserDbError;
-    use crate::app::auth::entity::user::UserRow;
+    use crate::auth::User;
+    use crate::auth::entity::user::UserDbError;
+    use crate::auth::entity::user::UserRow;
     use crate::contexts::use_client;
     use axum::http::StatusCode;
     use axum_session_auth::AuthSession;

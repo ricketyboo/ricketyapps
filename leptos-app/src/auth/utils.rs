@@ -21,7 +21,7 @@ pub async fn hash_password(password: &str) -> Result<String, &'static str> {
     Ok(password_hash)
 }
 
-use crate::app::auth::User;
+use crate::auth::User;
 pub async fn get_current_user() -> Result<Option<User>, anyhow::Error> {
     use axum_session_auth::AuthSession;
     use axum_session_sqlx::SessionPgPool;
