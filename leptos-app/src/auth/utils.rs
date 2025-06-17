@@ -21,13 +21,22 @@ pub async fn hash_password(password: &str) -> Result<String, &'static str> {
     Ok(password_hash)
 }
 
-use crate::auth::User;
-pub async fn get_current_user() -> Result<Option<User>, anyhow::Error> {
+pub mod session {
+    use crate::auth::User;
     use axum_session_auth::AuthSession;
+    use axum_session_auth::Authentication;
     use axum_session_sqlx::SessionPgPool;
     use sqlx::PgPool;
     use uuid::Uuid;
-    let auth_session =
-        leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
-    Ok(auth_session.current_user)
+
+    pub async fn get_current_user() -> Result<Option<User>, anyhow::Error> {
+        let auth_session =
+            leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
+        Ok(auth_session.current_user)
+    }
+
+    pub async fn is_user_logged_in() -> Result<bool, anyhow::Error> {
+        let current_user = get_current_user().await?;
+        Ok(current_user.is_some_and(|u| u.is_authenticated()))
+    }
 }

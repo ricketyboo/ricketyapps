@@ -34,14 +34,9 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 
 #[server]
 pub async fn check_auth() -> Result<bool, ServerFnError> {
-    use axum_session_auth::Authentication;
-    use axum_session_sqlx::SessionPgPool;
-    let auth = leptos_axum::extract::<
-        axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>,
-    >()
-    .await?;
-    let is_logged_in = auth.current_user.is_some_and(|u| u.is_authenticated());
-    Ok(is_logged_in)
+    auth::utils::session::is_user_logged_in()
+        .await
+        .map_err(|_| ServerFnError::new("AuthError"))
 }
 
 #[component]

@@ -140,7 +140,7 @@ impl From<UserRow> for User {
 #[async_trait::async_trait]
 impl Authentication<User, Uuid, PgPool> for User {
     async fn load_user(userid: Uuid, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
-        // because auth_session_axum expects to be using raw sqlx pools we stil have to pass that in.
+        // because auth_session_axum expects to be using raw sqlx pools we still have to pass that in.
         // but because welds wants a client we have to convert it from the pool.
         let welds_client: PostgresClient = pool.unwrap().clone().into();
         match UserRow::find_by_id(&welds_client, userid).await {
