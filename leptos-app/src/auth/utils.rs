@@ -26,17 +26,23 @@ pub mod session {
     use axum_session_auth::AuthSession;
     use axum_session_auth::Authentication;
     use axum_session_sqlx::SessionPgPool;
+    use leptos::prelude::ServerFnErrorErr;
     use sqlx::PgPool;
     use uuid::Uuid;
 
-    pub async fn get_current_user() -> Result<Option<User>, anyhow::Error> {
-        let auth_session =
-            leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
+    pub async fn get_auth_session()
+    -> Result<AuthSession<User, Uuid, SessionPgPool, PgPool>, ServerFnErrorErr> {
+        leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await
+    }
+
+    pub async fn get_current_user() -> Result<Option<User>, ServerFnErrorErr> {
+        let auth_session = get_auth_session().await?;
         Ok(auth_session.current_user)
     }
 
-    pub async fn is_user_logged_in() -> Result<bool, anyhow::Error> {
-        let current_user = get_current_user().await?;
-        Ok(current_user.is_some_and(|u| u.is_authenticated()))
+    pub async fn is_user_logged_in() -> Result<bool, ServerFnErrorErr> {
+        Ok(get_current_user()
+            .await
+            .is_ok_and(|u| u.is_some_and(|u| u.is_authenticated())))
     }
 }

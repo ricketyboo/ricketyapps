@@ -4,19 +4,13 @@ use leptos_router::components::A;
 
 #[server]
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
-    use crate::auth::User;
-    use crate::auth::entity::user::UserRow;
-
-    use axum::http::StatusCode;
-    use axum_session_auth::AuthSession;
-    use axum_session_sqlx::SessionPgPool;
-    use leptos::prelude::expect_context;
-    use sqlx::PgPool;
-    use uuid::Uuid;
-
     use crate::auth::entity::user::UserDbError;
-
+    use crate::auth::entity::user::UserRow;
+    use crate::auth::utils::session::get_auth_session;
     use crate::ssr::contexts::use_client;
+    use axum::http::StatusCode;
+    use leptos::prelude::expect_context;
+
     let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
 
     let opts = expect_context::<leptos_axum::ResponseOptions>();
@@ -24,8 +18,8 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
     match UserRow::create(credentials, &client).await {
         Ok(user_row) => {
             opts.set_status(StatusCode::CREATED);
-            let auth =
-                leptos_axum::extract::<AuthSession<User, Uuid, SessionPgPool, PgPool>>().await?;
+
+            let auth = get_auth_session().await?;
 
             auth.login_user(user_row.id);
 
