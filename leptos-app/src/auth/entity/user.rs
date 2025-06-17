@@ -94,7 +94,10 @@ impl User {
             }
         }
     }
-
+    // todo: the sudden shift from User to AuthSessionUser here is not good.
+    //  The intention is to avoid returning a password hash outside of the entity;
+    //  but I think that will be better done by just preventing the default fetching of the hash
+    //  and explicitly getting it in only this one case where I actually need it
     pub async fn get_by_credentials(
         credentials: Credentials,
         client: &PostgresClient,
