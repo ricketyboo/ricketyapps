@@ -4,7 +4,7 @@ use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use axum_session_sqlx::SessionPgPool;
 use leptos::logging::log;
 use leptos::prelude::*;
-use leptos_app::state::AppState;
+use leptos_app::ssr::state::AppState;
 use leptos_app::*;
 use leptos_axum::{LeptosRoutes, generate_route_list};
 use sqlx::PgPool;

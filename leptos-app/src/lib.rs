@@ -1,16 +1,5 @@
-// todo: these mods don't feel like the right place to do this
-
 #[cfg(feature = "ssr")]
-pub mod state;
-
-pub mod contexts;
-
-#[cfg(feature = "hydrate")]
-#[wasm_bindgen::prelude::wasm_bindgen]
-pub fn hydrate() {
-    console_error_panic_hook::set_once();
-    hydrate_body(App);
-}
+pub mod ssr;
 
 use crate::auth::routes::{Login, Logout, Register};
 use leptos::prelude::*;
@@ -164,4 +153,11 @@ fn HomePage() -> impl IntoView {
         <h1>"Welcome to Leptos!"</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
     }
+}
+
+#[cfg(feature = "hydrate")]
+#[wasm_bindgen::prelude::wasm_bindgen]
+pub fn hydrate() {
+    console_error_panic_hook::set_once();
+    hydrate_body(App);
 }

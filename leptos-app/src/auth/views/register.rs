@@ -16,7 +16,7 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
 
     use crate::auth::entity::user::UserDbError;
 
-    use crate::contexts::use_client;
+    use crate::ssr::contexts::use_client;
     let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
 
     let opts = expect_context::<leptos_axum::ResponseOptions>();

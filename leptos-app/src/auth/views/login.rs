@@ -7,7 +7,7 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
     use crate::auth::User;
     use crate::auth::entity::user::UserDbError;
     use crate::auth::entity::user::UserRow;
-    use crate::contexts::use_client;
+    use crate::ssr::contexts::use_client;
     use axum::http::StatusCode;
     use axum_session_auth::AuthSession;
     use axum_session_sqlx::SessionPgPool;
