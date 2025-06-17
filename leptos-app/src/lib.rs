@@ -73,7 +73,10 @@ pub fn App() -> impl IntoView {
                                     view! { <p>Loading...</p> }
                                 }>
                                     {move || Suspend::new(async move {
-                                        let is_logged_in = auth_resource.clone().await.is_ok_and(|r| r);
+                                        let is_logged_in = auth_resource
+                                            .clone()
+                                            .await
+                                            .is_ok_and(|r| r);
                                         view! {
                                             <Show
                                                 when=move || { is_logged_in }
@@ -114,7 +117,10 @@ pub fn App() -> impl IntoView {
                                         let is_logged_in = auth_resource.await.is_ok_and(|r| r);
                                         view! {
                                             <Show
-                                                when=move || { !is_logged_in || navigated().is_some_and(|u| u.eq("/logout")) }
+                                                when=move || {
+                                                    !is_logged_in
+                                                        || navigated().is_some_and(|u| u.eq("/logout"))
+                                                }
                                                 fallback=move || view! { <Redirect path="/" /> }
                                             >
                                                 <div id="auth-layout" class="root-layout">
