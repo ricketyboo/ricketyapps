@@ -61,7 +61,7 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
             auth.login_user(user_row.id);
 
             leptos_axum::redirect("/");
-            // return Ok(User::from(user_row))
+
             // todo: this isn't necessary
             Ok(user_row.id.to_string())
         }
