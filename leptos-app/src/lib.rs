@@ -32,7 +32,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
     }
 }
 
-#[server]
+#[server(endpoint = "auth/check")]
 pub async fn check_auth() -> Result<bool, ServerFnError> {
     auth::utils::session::is_user_logged_in()
         .await

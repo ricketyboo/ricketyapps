@@ -5,7 +5,7 @@ pub fn Logout() -> impl IntoView {
     OnceResource::new_blocking(logout());
 }
 
-#[server]
+#[server(endpoint = "auth/logout")]
 pub async fn logout() -> Result<(), ServerFnError> {
     use crate::auth;
     use axum_session_sqlx::SessionPgPool;

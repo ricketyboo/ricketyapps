@@ -40,7 +40,7 @@ pub fn Login() -> impl IntoView {
     }
 }
 
-#[server]
+#[server(endpoint = "auth/login")]
 pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError> {
     use crate::auth::entity::user::User;
     use crate::auth::entity::user::UserDbError;
