@@ -3,6 +3,43 @@ use crate::auth::Credentials;
 use leptos::prelude::*;
 use leptos_router::components::A;
 
+#[component]
+pub fn Login() -> impl IntoView {
+    let action = ServerAction::<TryLogin>::new();
+    let value = Signal::derive(move || action.value().get().unwrap_or_else(|| Ok("".into())));
+
+    view! {
+        <h2>"Login"</h2>
+        <ErrorBoundary fallback=move |errors| {
+            view! {
+                <p>Error</p>
+                <ul>
+                    {move || {
+                        errors
+                            .get()
+                            .into_iter()
+                            .map(|(_, e)| view! { <li>{e.to_string()}</li> })
+                            .collect::<Vec<_>>()
+                    }}
+                </ul>
+            }
+        }>
+            // hack: this is just so the error boundary will actually trigger.
+            // I never want to display this. Replace this pattern with an error memo on the value maybe?
+            // this pattern is meant to support no JS/progressive flows; but it doesn't seem to work anyway
+            <span style="display: none">{value}</span>
+        </ErrorBoundary>
+        <ActionForm action>
+            <label>"username"<input name="credentials[username]" /></label>
+            <label>"password"<input name="credentials[password]" type="password" /></label>
+            <button>Login</button>
+            // todo: wrap this with an app config check to determine if registration is available.
+            <small>"Don't have an account? "<A href="../register">"Register"</A></small>
+            <small>Go Home? <A href="/">Home</A></small>
+        </ActionForm>
+    }
+}
+
 #[server]
 pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError> {
     use crate::auth::entity::user::UserDbError;
@@ -44,42 +81,5 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
             }
             UserDbError::UnknownError => Err(ServerFnError::new("System error")),
         },
-    }
-}
-
-#[component]
-pub fn Login() -> impl IntoView {
-    let action = ServerAction::<TryLogin>::new();
-    let value = Signal::derive(move || action.value().get().unwrap_or_else(|| Ok("".into())));
-
-    view! {
-        <h2>"Login"</h2>
-        <ErrorBoundary fallback=move |errors| {
-            view! {
-                <p>Error</p>
-                <ul>
-                    {move || {
-                        errors
-                            .get()
-                            .into_iter()
-                            .map(|(_, e)| view! { <li>{e.to_string()}</li> })
-                            .collect::<Vec<_>>()
-                    }}
-                </ul>
-            }
-        }>
-            // hack: this is just so the error boundary will actually trigger.
-            // I never want to display this. Replace this pattern with an error memo on the value maybe?
-            // this pattern is meant to support no JS/progressive flows; but it doesn't seem to work anyway
-            <span style="display: none">{value}</span>
-        </ErrorBoundary>
-        <ActionForm action>
-            <label>"username"<input name="credentials[username]" /></label>
-            <label>"password"<input name="credentials[password]" type="password" /></label>
-            <button>Login</button>
-            // todo: wrap this with an app config check to determine if registration is available.
-            <small>"Don't have an account? "<A href="../register">"Register"</A></small>
-            <small>Go Home? <A href="/">Home</A></small>
-        </ActionForm>
     }
 }
