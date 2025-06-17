@@ -1,4 +1,3 @@
-use crate::app::auth;
 use leptos::prelude::*;
 
 #[component]
@@ -8,6 +7,7 @@ pub fn Logout() -> impl IntoView {
 
 #[server]
 pub async fn logout() -> Result<(), ServerFnError> {
+    use crate::app::auth;
     use axum_session_sqlx::SessionPgPool;
     let auth = leptos_axum::extract::<
         axum_session_auth::AuthSession<auth::User, uuid::Uuid, SessionPgPool, sqlx::PgPool>,
