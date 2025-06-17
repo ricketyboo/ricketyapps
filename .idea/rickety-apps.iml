@@ -6,6 +6,10 @@
       <sourceFolder url="file://$MODULE_DIR$/leptos-app/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/leptos-server/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/auth/api/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/auth/data/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/auth/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/auth/web/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/leptos-app/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
