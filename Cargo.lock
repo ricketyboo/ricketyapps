@@ -3274,7 +3274,7 @@ version = "0.1.0"
 dependencies = [
  "common",
  "leptos",
- "leptos_router",
+ "leptos_axum",
  "serde",
  "sqlx",
  "uuid",

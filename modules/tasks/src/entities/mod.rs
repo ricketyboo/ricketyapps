@@ -1,4 +1,4 @@
-use crate::dto::CreateTask;
+use crate::dto::{CreateTask, TaskListItem};
 use uuid::Uuid;
 use welds::prelude::*;
 
@@ -18,5 +18,15 @@ impl From<CreateTask> for DbState<Task> {
         task.title = value.title;
         task.content = value.content;
         task
+    }
+}
+
+impl From<Task> for TaskListItem {
+    fn from(value: Task) -> Self {
+        Self {
+            id: value.id,
+            title: value.title,
+            content: value.content,
+        }
     }
 }
