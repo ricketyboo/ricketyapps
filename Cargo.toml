@@ -8,13 +8,66 @@ panic = "abort"
 
 [workspace]
 resolver = "2"
-members = ["core-libs", "leptos-app", "leptos-server", "modules/auth", "modules/auth/api", "modules/auth/data", "modules/auth/web"]
+members = ["app", "modules/*", "server"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.87"
+license = "AGPL-3"
+publish = false
+
+[workspace.dependencies]
+auth = { path = "modules/auth" }
+common = { path = "common" }
+
+# data layer
+uuid = { version = "1.17", features = ["v4", "js", "serde"] }
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-native-tls", "uuid", "chrono"] }
+welds = { version = "0.4", features = ["postgres"] }
+serde = { version = "1.0", features = ["derive"] }
+
+#error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+#auth
+argon2 = { version = "0.5", features = ["rand"] }
+# 0.9 is not compatible with argon 0.5 salt
+rand = { version = "0.8" }
+secrecy = "0.10"
+
+#axum
+tokio = { version = "1", features = ["rt-multi-thread"] }
+axum = { version = "0.8.0", features = ["default", "macros"] }
+
+# leptos
+leptos = { version = "0.8.0", features = ["nightly"] }
+leptos_router = { version = "0.8.0", features = ["nightly"] }
+leptos_meta = { version = "0.8.0" }
+leptos_axum = { version = "0.8.0" }
+
+#axum session management
+axum_session = { version = "0.16" }
+axum_session_sqlx = { version = "0.5" }
+axum_session_auth = { version = "0.16" }
+async-trait = { version = "0.1.88" }
+
+# other leptos recommended
+console_error_panic_hook = "0.1.7"
+console_log = "1.0.0"
+log = "0.4.27"
+simple_logger = "5.0.0"
+wasm-bindgen = "=0.2.100"
+
+# misc
+dotenvy = "0.15"
 
 [[workspace.metadata.leptos]]
 
-bin-package = "leptos-server"
+bin-package = "server"
 
-lib-package = "leptos-app"
+lib-package = "app"
 
 # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
 name = "rickety-apps"
@@ -35,7 +88,7 @@ style-file = "style/main.scss"
 assets-dir = "public"
 
 # The IP and port (ex: 127.0.0.1:3000) where the api serves the content. Use it in your api setup.
-site-addr = "127.0.0.1:3000"
+site-addr = "127.0.0.1:3009"
 
 # The port to use for automatic reload monitoring
 reload-port = 3001
@@ -55,7 +108,7 @@ env = "DEV"
 # The features to use when compiling the bin target
 #
 # Optional. Can be over-ridden with the command line parameter --bin-features
-bin-features = ["ssr"]
+bin-features = []
 
 # If the --no-default-features flag should be used when compiling the bin target
 #

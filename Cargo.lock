@@ -101,8 +101,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
 
 [[package]]
-name = "api"
+name = "app"
 version = "0.1.0"
+dependencies = [
+ "auth",
+ "console_error_panic_hook",
+ "console_log",
+ "leptos",
+ "leptos_axum",
+ "leptos_meta",
+ "leptos_router",
+ "log",
+ "thiserror 2.0.12",
+ "wasm-bindgen",
+]
 
 [[package]]
 name = "argon2"
@@ -192,9 +204,24 @@ dependencies = [
 name = "auth"
 version = "0.1.0"
 dependencies = [
- "api",
- "data",
- "web",
+ "anyhow",
+ "argon2",
+ "async-trait",
+ "axum",
+ "axum_session",
+ "axum_session_auth",
+ "axum_session_sqlx",
+ "common",
+ "leptos",
+ "leptos_axum",
+ "leptos_meta",
+ "leptos_router",
+ "rand 0.8.5",
+ "serde",
+ "sqlx",
+ "thiserror 2.0.12",
+ "uuid",
+ "welds",
 ]
 
 [[package]]
@@ -441,10 +468,8 @@ checksum = "c469d952047f47f91b68d1cba3f10d63c11d73e4636f24f08daf0278abf01c4d"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
- "js-sys",
  "num-traits",
  "serde",
- "wasm-bindgen",
  "windows-link",
 ]
 
@@ -476,6 +501,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "186dce98367766de751c42c4f03970fc60fc012296e706ccbb9d5df9b6c1e271"
 
 [[package]]
+name = "colored"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "117725a109d387c937a1533ce01b450cbde6b88abceea8473c4d7a85853cda3c"
+dependencies = [
+ "lazy_static",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "common"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "leptos",
+ "leptos_axum",
+ "secrecy",
+ "welds",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -505,6 +551,16 @@ checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
 dependencies = [
  "cfg-if",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "console_log"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be8aed40e4edbf4d3b4431ab260b63fdc40f5780a4766824329ea0f1eefe3c0f"
+dependencies = [
+ "log",
+ "web-sys",
 ]
 
 [[package]]
@@ -595,14 +651,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
-name = "core-libs"
-version = "0.1.0"
-dependencies = [
- "secrecy",
- "welds",
-]
-
-[[package]]
 name = "cpufeatures"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -674,10 +722,6 @@ dependencies = [
  "once_cell",
  "parking_lot_core",
 ]
-
-[[package]]
-name = "data"
-version = "0.1.0"
 
 [[package]]
 name = "data-encoding"
@@ -1510,62 +1554,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "leptos-app"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "argon2",
- "async-trait",
- "auth",
- "axum",
- "axum_session",
- "axum_session_auth",
- "axum_session_sqlx",
- "chrono",
- "console_error_panic_hook",
- "dotenvy",
- "leptos",
- "leptos_axum",
- "leptos_meta",
- "leptos_router",
- "rand 0.8.5",
- "serde",
- "sqlx",
- "thiserror 2.0.12",
- "tokio",
- "uuid",
- "wasm-bindgen",
- "welds",
-]
-
-[[package]]
-name = "leptos-server"
-version = "0.1.0"
-dependencies = [
- "argon2",
- "axum",
- "axum_session",
- "axum_session_auth",
- "axum_session_sqlx",
- "chrono",
- "console_error_panic_hook",
- "core-libs",
- "dotenvy",
- "leptos",
- "leptos-app",
- "leptos_axum",
- "leptos_meta",
- "leptos_router",
- "rand 0.8.5",
- "serde",
- "sqlx",
- "tokio",
- "uuid",
- "wasm-bindgen",
- "welds",
-]
-
-[[package]]
 name = "leptos_axum"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1991,6 +1979,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "91df4bbde75afed763b708b7eee1e8e7651e02d97f6d5dd763e89367e957b23b"
 dependencies = [
  "hermit-abi",
+ "libc",
+]
+
+[[package]]
+name = "num_threads"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c7398b9c8b70908f6371f47ed36737907c87c52af34c268fed0bf0ceb92ead9"
+dependencies = [
  "libc",
 ]
 
@@ -2763,6 +2760,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "server"
+version = "0.1.0"
+dependencies = [
+ "app",
+ "auth",
+ "axum",
+ "axum_session",
+ "axum_session_auth",
+ "axum_session_sqlx",
+ "common",
+ "dotenvy",
+ "leptos",
+ "leptos_axum",
+ "log",
+ "simple_logger",
+ "sqlx",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
 name = "server_fn"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2873,6 +2891,18 @@ checksum = "77549399552de45a898a580c1b41d445bf730df867cc44e6c0233bbc4b8329de"
 dependencies = [
  "digest",
  "rand_core 0.6.4",
+]
+
+[[package]]
+name = "simple_logger"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8c5dfa5e08767553704aa0ffd9d9794d527103c736aba9854773851fd7497eb"
+dependencies = [
+ "colored",
+ "log",
+ "time",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -3306,7 +3336,9 @@ checksum = "8a7619e19bc266e0f9c5e6686659d394bc57973859340060a69221e57dbc0c40"
 dependencies = [
  "deranged",
  "itoa",
+ "libc",
  "num-conv",
+ "num_threads",
  "powerfmt",
  "serde",
  "time-core",
@@ -3810,10 +3842,6 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
 ]
-
-[[package]]
-name = "web"
-version = "0.1.0"
 
 [[package]]
 name = "web-sys"

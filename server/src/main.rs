@@ -4,17 +4,19 @@ use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use axum_session_sqlx::SessionPgPool;
 use leptos::logging::log;
 use leptos::prelude::*;
-use leptos_app::auth::*;
-use leptos_app::ssr::state::AppState;
-use leptos_app::*;
+
+use app::*;
+use auth::dto::AuthSessionUser;
+use common::state::AppState;
 use leptos_axum::{LeptosRoutes, generate_route_list};
 use sqlx::PgPool;
 use uuid::Uuid;
+
 #[tokio::main]
 async fn main() {
-    dotenvy::dotenv().expect(".env file not found");
+    dotenvy::dotenv().expect("Unable to load environment variables");
 
-    let client = core_libs::db::get_client()
+    let client = common::db::init_db_client()
         .await
         .expect("Unable to connect to DB");
 

@@ -1,3 +1,5 @@
+use crate::state::AppState;
+use leptos::prelude::*;
 use secrecy::{ExposeSecret, SecretString};
 use std::env;
 use welds::connections::postgres::PostgresClient;
@@ -39,7 +41,11 @@ impl DatabaseConfiguration {
     }
 }
 
-pub async fn get_client() -> welds::connections::errors::Result<PostgresClient> {
+pub async fn init_db_client() -> welds::connections::errors::Result<PostgresClient> {
     let db_config = DatabaseConfiguration::from_env();
     welds::connections::postgres::connect(&db_config.connection_string()).await
+}
+
+pub fn use_client() -> Option<PostgresClient> {
+    with_context::<AppState, _>(|state| state.client.clone())
 }
