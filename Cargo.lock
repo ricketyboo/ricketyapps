@@ -112,6 +112,7 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "log",
+ "tasks",
  "thiserror 2.0.12",
  "wasm-bindgen",
 ]
@@ -2776,6 +2777,7 @@ dependencies = [
  "log",
  "simple_logger",
  "sqlx",
+ "tasks",
  "tokio",
  "uuid",
 ]
@@ -3264,6 +3266,19 @@ dependencies = [
  "throw_error",
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "tasks"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "leptos",
+ "leptos_router",
+ "serde",
+ "sqlx",
+ "uuid",
+ "welds",
 ]
 
 [[package]]

@@ -11,6 +11,9 @@ publish.workspace = true
 [dependencies]
 app = { path = "../app", features = ["ssr"] }
 auth = { workspace = true, features = ["ssr"] }
+#todo: I have to import this into server in order for the app to render properly.
+# I think this means I've got the SSR feature wrong in either app or tasks, because server doesn't actually use it
+tasks = { workspace = true, features = ["ssr"] }
 
 common.workspace = true
 
