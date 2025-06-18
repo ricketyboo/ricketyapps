@@ -1,10 +1,7 @@
-use crate::auth::utils::hash_password;
-use crate::auth::{AuthSessionUser, Credentials};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
-use axum_session_auth::Authentication;
-use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::dto::Credentials;
 use thiserror::Error;
 use welds::WeldsModel;
 use welds::connections::postgres::PostgresClient;
@@ -13,8 +10,9 @@ use welds::connections::postgres::PostgresClient;
 #[welds(table = "users")]
 pub struct User {
     #[welds(primary_key)]
-    pub(crate) id: Uuid,
-    username: String,
+    pub id: Uuid,
+    pub(crate) username: String,
+    // todo: Avoid returning password_hash preventing the fetching of the hash generally and explicitly getting it in only the one case where I actually need it for comparison
     // todo: SecretString
     password_hash: String,
 }
@@ -62,6 +60,7 @@ impl User {
             return Err(UserDbError::UsernameExists);
         };
 
+        // todo: remove unwrap and handle error
         let password_hash = hash_password(&credentials.password).await.unwrap();
         let mut model = User::new();
         model.username = credentials.username;
@@ -94,14 +93,11 @@ impl User {
             }
         }
     }
-    // todo: the sudden shift from User to AuthSessionUser here is not good.
-    //  The intention is to avoid returning a password hash outside of the entity;
-    //  but I think that will be better done by just preventing the default fetching of the hash
-    //  and explicitly getting it in only this one case where I actually need it
+
     pub async fn get_by_credentials(
         credentials: Credentials,
         client: &PostgresClient,
-    ) -> Result<Option<AuthSessionUser>, UserDbError> {
+    ) -> Result<Option<User>, UserDbError> {
         match Self::get_by_username(credentials.username, client).await {
             Ok(Some(u)) => {
                 let expected_hash =
@@ -110,7 +106,7 @@ impl User {
                     .verify_password(credentials.password.as_bytes(), &expected_hash)
                     .is_ok()
                 {
-                    return Ok(Some(AuthSessionUser::from(u)));
+                    return Ok(Some(u));
                 }
                 Ok(None)
             }
@@ -129,45 +125,23 @@ impl User {
     }
 }
 
-impl From<User> for AuthSessionUser {
-    fn from(value: User) -> Self {
-        Self {
-            id: value.id,
-            username: value.username,
-            anonymous: false,
-        }
-    }
-}
+async fn hash_password(password: &str) -> Result<String, &'static str> {
+    use argon2::Algorithm::Argon2id;
+    use argon2::password_hash::SaltString;
+    use argon2::{Argon2, Params, PasswordHasher, Version};
 
-#[async_trait::async_trait]
-impl Authentication<AuthSessionUser, Uuid, PgPool> for AuthSessionUser {
-    async fn load_user(
-        userid: Uuid,
-        pool: Option<&PgPool>,
-    ) -> Result<AuthSessionUser, anyhow::Error> {
-        // because auth_session_axum expects to be using raw sqlx pools we still have to pass that in.
-        // but because welds wants a client we have to convert it from the pool.
-        let welds_client: PostgresClient = pool.unwrap().clone().into();
-        match User::find_by_id(&welds_client, userid).await {
-            Ok(Some(u)) => Ok(u.into_inner().into()),
-            Ok(None) => Ok(AuthSessionUser {
-                id: Uuid::nil(),
-                username: String::from(""),
-                anonymous: true,
-            }),
-            Err(_) => Err(anyhow::anyhow!("Cannot get user")),
-        }
-    }
+    use rand::thread_rng;
 
-    fn is_authenticated(&self) -> bool {
-        !self.anonymous
-    }
+    let salt = SaltString::generate(&mut thread_rng());
+    let password_hash = Argon2::new(
+        Argon2id,
+        Version::V0x13,
+        // https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+        Params::new(19456, 2, 1, None).unwrap(),
+    )
+    .hash_password(password.as_bytes(), &salt)
+    .unwrap()
+    .to_string();
 
-    fn is_active(&self) -> bool {
-        !self.anonymous
-    }
-
-    fn is_anonymous(&self) -> bool {
-        self.anonymous
-    }
+    Ok(password_hash)
 }

@@ -1,0 +1,29 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+app = { path = "../app", features = ["ssr"] }
+auth = { workspace = true, features = ["ssr"] }
+
+common.workspace = true
+
+axum_session.workspace = true
+axum_session_auth.workspace = true
+axum_session_sqlx.workspace = true
+
+leptos = { workspace = true, features = ["ssr"] }
+leptos_axum.workspace = true
+
+axum.workspace = true
+simple_logger.workspace = true
+tokio.workspace = true
+log.workspace = true
+
+sqlx.workspace = true
+uuid.workspace = true
+
+dotenvy.workspace = true

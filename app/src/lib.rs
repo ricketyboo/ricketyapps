@@ -1,9 +1,7 @@
-#[cfg(feature = "ssr")]
-pub mod ssr;
-
-use crate::auth::routes::{Login, Logout, Register};
+use auth::views::login::LoginPage;
+use auth::views::logout::LogoutPage;
+use auth::views::register::RegisterPage;
 use leptos::prelude::*;
-
 use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
 use leptos_router::components::{A, Outlet, ParentRoute, Redirect, Route};
 use leptos_router::hooks::use_url;
@@ -11,8 +9,6 @@ use leptos_router::{
     components::{Router, Routes},
     path,
 };
-
-pub mod auth;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -34,7 +30,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 
 #[server(endpoint = "auth/check")]
 pub async fn check_auth() -> Result<bool, ServerFnError> {
-    auth::utils::session::is_user_logged_in()
+    auth::session::is_user_logged_in()
         .await
         .map_err(|_| ServerFnError::new("AuthError"))
 }
@@ -133,9 +129,9 @@ pub fn App() -> impl IntoView {
                             }
                         }
                     >
-                        <Route path=path!("login") view=Login />
-                        <Route path=path!("register") view=Register />
-                        <Route path=path!("logout") view=Logout />
+                        <Route path=path!("login") view=LoginPage />
+                        <Route path=path!("register") view=RegisterPage />
+                        <Route path=path!("logout") view=LogoutPage />
                     </ParentRoute>
                 </Routes>
             </main>

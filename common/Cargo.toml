@@ -1,0 +1,16 @@
+[package]
+name = "common"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+
+secrecy.workspace = true
+welds.workspace = true
+axum.workspace = true
+
+leptos.workspace = true
+leptos_axum.workspace = true

@@ -1,9 +1,9 @@
-use crate::auth::Credentials;
+use crate::dto::Credentials;
 use leptos::prelude::*;
 use leptos_router::components::A;
 
 #[component]
-pub fn Register() -> impl IntoView {
+pub fn RegisterPage() -> impl IntoView {
     let action = ServerAction::<TryRegister>::new();
     let value = Signal::derive(move || action.value().get().unwrap_or_else(|| Ok(String::new())));
 
@@ -41,14 +41,10 @@ pub fn Register() -> impl IntoView {
 
 #[server(endpoint = "auth/register")]
 pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnError> {
-    use crate::auth::entity::user::User;
-    use crate::auth::entity::user::UserDbError;
-    use crate::auth::utils::session::get_auth_session;
-    use crate::ssr::contexts::use_client;
+    use crate::entities::{User, UserDbError};
     use axum::http::StatusCode;
-    use leptos::prelude::expect_context;
 
-    let client = use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
+    let client = common::db::use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
 
     let opts = expect_context::<leptos_axum::ResponseOptions>();
 
@@ -56,7 +52,7 @@ pub async fn try_register(credentials: Credentials) -> Result<String, ServerFnEr
         Ok(user_row) => {
             opts.set_status(StatusCode::CREATED);
 
-            let auth = get_auth_session().await?;
+            let auth = crate::session::get_auth_session().await?;
 
             auth.login_user(user_row.id);
 
