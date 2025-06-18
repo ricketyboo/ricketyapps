@@ -1,3 +1,10 @@
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.87"
+license = "AGPL-3"
+publish = false
+
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
 inherits = "release"
@@ -9,13 +16,6 @@ panic = "abort"
 [workspace]
 resolver = "2"
 members = ["app", "modules/*", "server"]
-
-[workspace.package]
-version = "0.1.0"
-edition = "2024"
-rust-version = "1.87"
-license = "AGPL-3"
-publish = false
 
 [workspace.dependencies]
 auth = { path = "modules/auth" }
@@ -88,7 +88,7 @@ style-file = "style/main.scss"
 assets-dir = "public"
 
 # The IP and port (ex: 127.0.0.1:3000) where the api serves the content. Use it in your api setup.
-site-addr = "127.0.0.1:3009"
+site-addr = "127.0.0.1:3000"
 
 # The port to use for automatic reload monitoring
 reload-port = 3001
