@@ -19,23 +19,24 @@ pub fn TaskIndex() -> impl IntoView {
             view! { <p>Loading tasks</p> }
         }>
             {move || Suspend::new(async move {
-                if let Ok(tasks) = tasks_resource.await {
-                    view! {
-                        <ul id="task-list">
-                            <For each=move || tasks.clone() key=|t| t.id let(task)>
-                                <li>
-                                    <label>
-                                        <input type="checkbox" disabled />
-                                        {task.title}
-                                    </label>
-
-                                </li>
-                            </For>
-                        </ul>
+                match tasks_resource.await {
+                    Ok(tasks) if !tasks.is_empty() => {
+                        view! {
+                            <ul id="task-list">
+                                <For each=move || tasks.clone() key=|t| t.id let(task)>
+                                    <li>
+                                        <label>
+                                            <input type="checkbox" disabled />
+                                            {task.title}
+                                        </label>
+                                    </li>
+                                </For>
+                            </ul>
+                        }
+                            .into_any()
                     }
-                        .into_any()
-                } else {
-                    view! { <p>Unable to load tasks</p> }.into_any()
+                    Ok(_) => view! { <p>No tasks!</p> }.into_any(),
+                    Err(_) => view! { <p>Error loading your tasks</p> }.into_any(),
                 }
             })}
         </Suspense>
