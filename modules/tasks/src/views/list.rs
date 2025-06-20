@@ -1,5 +1,4 @@
 use crate::dto::TaskListItem;
-use leptos::logging::log;
 use leptos::prelude::*;
 use leptos::{IntoView, component, server, view};
 use uuid::Uuid;
@@ -9,14 +8,13 @@ pub(super) fn TaskListItem(task: TaskListItem) -> impl IntoView {
     let complete = RwSignal::new(task.completed_at.is_some());
     let action = ServerAction::<SetTaskStatus>::new();
     Effect::new(move |v| {
-        log!("v {:?}", v);
+        let completed = complete.read();
+        // don't run this on the first load, or we'll re-update everything as the list loads
         if v != None {
             action.dispatch(SetTaskStatus {
                 task_id: task.id,
-                completed: complete.get(),
+                completed: completed.clone(),
             });
-        } else {
-            log!("First run, task is {}", complete.read())
         }
     });
     view! {
