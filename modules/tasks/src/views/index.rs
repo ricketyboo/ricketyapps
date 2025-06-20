@@ -5,8 +5,8 @@ use leptos::prelude::*;
 #[component]
 pub fn TaskIndex() -> impl IntoView {
     let action = ServerAction::<AddTask>::new();
-    // todo: optimistic updates and refetching on success
-    let tasks_resource = OnceResource::new(get_tasks());
+    // todo: optimistic updates
+    let tasks_resource = Resource::new(move || action.version().get(), move |_| get_tasks());
     view! {
         <h1>Tasks</h1>
         <ActionForm action>
