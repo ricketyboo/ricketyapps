@@ -7,16 +7,20 @@ use welds::prelude::*;
 pub struct Task {
     #[welds(primary_key)]
     pub id: Uuid,
+    pub owner_id: Uuid,
     pub title: String,
     pub content: Option<String>,
 }
 
-impl From<CreateTask> for DbState<Task> {
-    fn from(value: CreateTask) -> Self {
+impl Task {
+    pub(crate) async fn from_dto_for_owner(
+        create_task: CreateTask,
+        owner_id: &Uuid,
+    ) -> DbState<Task> {
         let mut task = Task::new();
-        // todo: owner_id from session
-        task.title = value.title;
-        task.content = value.content;
+        task.title = create_task.title;
+        task.content = create_task.content;
+        task.owner_id = *owner_id;
         task
     }
 }

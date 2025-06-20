@@ -8,6 +8,7 @@ publish.workspace = true
 
 [dependencies]
 common = { workspace = true, optional = true }
+auth = { workspace = true, optional = true }
 leptos = { workspace = true }
 leptos_axum = { workspace = true, optional = true }
 serde = { workspace = true }
@@ -20,6 +21,7 @@ uuid = { workspace = true }
 [features]
 ssr = [
     "common",
+    "auth",
     "sqlx",
     "welds",
     "leptos_axum"

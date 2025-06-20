@@ -45,10 +45,11 @@ pub fn TaskIndex() -> impl IntoView {
 #[server]
 pub async fn add_task(create_task: CreateTask) -> Result<(), ServerFnError> {
     use crate::entities::Task;
-    use welds::state::DbState;
-    // Use task entity to create
-    let mut task: DbState<Task> = create_task.into();
     let client = common::db::use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
+    let owner = auth::session::get_current_user()
+        .await?
+        .expect("Unable to get current user");
+    let mut task = Task::from_dto_for_owner(create_task, &owner.id).await;
     task.save(&client).await?;
     Ok(())
 }
@@ -58,7 +59,13 @@ pub async fn get_tasks() -> Result<Vec<TaskListItem>, ServerFnError> {
     use crate::entities::Task;
     use welds::prelude::*;
     let client = common::db::use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
-    let tasks_db_state = Task::all().run(&client).await?;
+    let owner = auth::session::get_current_user()
+        .await?
+        .expect("Unable to get current user");
+    let tasks_db_state = Task::all()
+        .where_col(|t| t.owner_id.equal(owner.id))
+        .run(&client)
+        .await?;
     let tasks: Vec<TaskListItem> = tasks_db_state
         .into_inners()
         .into_iter()

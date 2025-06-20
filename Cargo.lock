@@ -3272,6 +3272,7 @@ dependencies = [
 name = "tasks"
 version = "0.1.0"
 dependencies = [
+ "auth",
  "common",
  "leptos",
  "leptos_axum",
