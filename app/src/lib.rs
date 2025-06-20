@@ -9,6 +9,7 @@ use leptos_router::{
     components::{Router, Routes},
     path,
 };
+use tasks::views::TaskIndex;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -81,6 +82,7 @@ pub fn App() -> impl IntoView {
                                                 <div id="app-layout" class="root-layout">
                                                     <nav id="main-nav">
                                                         <A href="/">"Home"</A>
+                                                        <A href="/tasks">"Tasks"</A>
 
                                                         <A href="/logout">"Logout"</A>
                                                     </nav>
@@ -94,6 +96,7 @@ pub fn App() -> impl IntoView {
                         }
                     >
                         <Route path=path!("") view=HomePage />
+                        <Route path=path!("tasks") view=TaskIndex />
                     </ParentRoute>
 
                     // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model

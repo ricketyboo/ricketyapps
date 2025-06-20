@@ -1,0 +1,31 @@
+[package]
+name = "tasks"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+common = { workspace = true, optional = true }
+auth = { workspace = true, optional = true }
+leptos = { workspace = true }
+leptos_axum = { workspace = true, optional = true }
+serde = { workspace = true }
+
+sqlx = { workspace = true, optional = true }
+welds = { workspace = true, optional = true }
+
+chrono = { workspace = true }
+uuid = { workspace = true }
+
+utility-types.workspace = true
+
+[features]
+ssr = [
+    "common",
+    "auth",
+    "sqlx",
+    "welds",
+    "leptos_axum"
+]
