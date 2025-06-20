@@ -19,6 +19,8 @@ welds = { workspace = true, optional = true }
 chrono = { workspace = true }
 uuid = { workspace = true }
 
+utility-types.workspace = true
+
 [features]
 ssr = [
     "common",

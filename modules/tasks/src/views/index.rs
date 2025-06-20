@@ -1,5 +1,5 @@
 use super::list::TaskListItem;
-use crate::dto::{CreateTask, TaskListItem};
+use crate::dto::{CreateTaskInput, TaskListItem};
 use leptos::prelude::*;
 
 #[component]
@@ -42,7 +42,7 @@ pub fn TaskIndex() -> impl IntoView {
 }
 
 #[server]
-pub async fn add_task(create_task: CreateTask) -> Result<(), ServerFnError> {
+pub async fn add_task(create_task: CreateTaskInput) -> Result<(), ServerFnError> {
     use crate::entities::Task;
     let client = common::db::use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
     let owner = auth::session::get_current_user()
