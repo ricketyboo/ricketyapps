@@ -1,5 +1,7 @@
 use super::list::TaskListItem;
 use crate::dto::{CreateTaskInput, TaskListItem};
+
+use leptos::html::Form;
 use leptos::prelude::*;
 
 #[component]
@@ -7,9 +9,14 @@ pub fn TaskIndex() -> impl IntoView {
     let action = ServerAction::<AddTask>::new();
     // todo: optimistic updates
     let tasks_resource = Resource::new(move || action.version().get(), move |_| get_tasks());
+    let form_ref: NodeRef<Form> = NodeRef::new();
+    Effect::new(move || {
+        action.version().get();
+        form_ref.get().unwrap().reset();
+    });
     view! {
         <h1>Tasks</h1>
-        <ActionForm action>
+        <ActionForm action node_ref=form_ref>
             <label>"Task"<input name="create_task[title]" /></label>
             <label>"Description"<input name="create_task[content]" /></label>
             <button>"Submit"</button>
