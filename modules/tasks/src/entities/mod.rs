@@ -1,4 +1,5 @@
 use crate::dto::{CreateTask, TaskListItem};
+use sqlx::types::chrono;
 use uuid::Uuid;
 use welds::prelude::*;
 
@@ -10,6 +11,9 @@ pub struct Task {
     pub owner_id: Uuid,
     pub title: String,
     pub content: Option<String>,
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub completed_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 impl Task {
@@ -31,6 +35,7 @@ impl From<Task> for TaskListItem {
             id: value.id,
             title: value.title,
             content: value.content,
+            completed_at: value.completed_at,
         }
     }
 }

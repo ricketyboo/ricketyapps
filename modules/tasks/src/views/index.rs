@@ -1,3 +1,4 @@
+use super::list::TaskListItem;
 use crate::dto::{CreateTask, TaskListItem};
 use leptos::prelude::*;
 
@@ -25,10 +26,7 @@ pub fn TaskIndex() -> impl IntoView {
                             <ul id="task-list">
                                 <For each=move || tasks.clone() key=|t| t.id let(task)>
                                     <li>
-                                        <label>
-                                            <input type="checkbox" disabled />
-                                            {task.title}
-                                        </label>
+                                        <TaskListItem task/>
                                     </li>
                                 </For>
                             </ul>
@@ -65,6 +63,7 @@ pub async fn get_tasks() -> Result<Vec<TaskListItem>, ServerFnError> {
         .expect("Unable to get current user");
     let tasks_db_state = Task::all()
         .where_col(|t| t.owner_id.equal(owner.id))
+        .order_by_asc(|t| t.created_at)
         .run(&client)
         .await?;
     let tasks: Vec<TaskListItem> = tasks_db_state
