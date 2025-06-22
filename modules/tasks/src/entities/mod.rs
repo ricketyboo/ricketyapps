@@ -5,11 +5,19 @@ use uuid::Uuid;
 use welds::prelude::*;
 
 #[derive(Debug, WeldsModel, Omit)]
-// slightly silly workaround for https://github.com/weldsorm/welds/issues/122 to avoid writing epoch into the created_at DB column
+// slightly silly workarounds for https://github.com/weldsorm/welds/issues/122 to avoid writing columns that the DB owns but that we need to read
 #[omit(
     arg(
         ident = CreateTask,
-        fields(created_at),
+        fields(completed, created_at),
+        derive(Debug, WeldsModel),
+        forward_attrs(welds)
+    )
+)]
+#[omit(
+    arg(
+        ident = UpdateTask,
+        fields(completed),
         derive(Debug, WeldsModel),
         forward_attrs(welds)
     )
@@ -24,6 +32,7 @@ pub struct Task {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
     pub completed_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub completed: bool,
 }
 
 impl Task {
