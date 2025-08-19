@@ -37,6 +37,7 @@ impl From<Task> for TaskListItem {
             title: value.title,
             content: value.content,
             completed_at: value.completed_at,
+            completed: value.completed,
         }
     }
 }

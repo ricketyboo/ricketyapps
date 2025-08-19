@@ -14,4 +14,5 @@ pub struct TaskListItem {
     pub title: String,
     pub content: Option<String>,
     pub completed_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub completed: bool,
 }

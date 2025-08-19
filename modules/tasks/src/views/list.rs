@@ -37,7 +37,7 @@ pub(super) fn TaskList(
 
 #[component]
 fn TaskListItem(task: TaskListItem) -> impl IntoView {
-    let complete = RwSignal::new(task.completed_at.is_some());
+    let complete = RwSignal::new(task.completed);
     let action = ServerAction::<SetTaskStatus>::new();
     Effect::new(move |v| {
         let completed = complete.read();
