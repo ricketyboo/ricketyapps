@@ -23,7 +23,7 @@ tasks = { path = "modules/tasks" }
 common = { path = "common" }
 
 # data layer
-uuid = { version = "1.17", features = ["v4", "js", "serde"] }
+uuid = { version = "1", features = ["v4", "js", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-native-tls", "uuid", "chrono"] }
 welds = { version = "0.4", features = ["postgres"] }
@@ -54,13 +54,13 @@ leptos_axum = { version = "0.8.0" }
 axum_session = { version = "0.16" }
 axum_session_sqlx = { version = "0.5" }
 axum_session_auth = { version = "0.16" }
-async-trait = { version = "0.1.88" }
+async-trait = { version = "0.1" }
 
 # other leptos recommended
-console_error_panic_hook = "0.1.7"
-console_log = "1.0.0"
-log = "0.4.27"
-simple_logger = "5.0.0"
+console_error_panic_hook = "0.1"
+console_log = "1"
+log = "0.4"
+simple_logger = "5"
 wasm-bindgen = "=0.2.100"
 
 # misc
