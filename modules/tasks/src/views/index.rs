@@ -32,7 +32,7 @@ pub async fn add_task(create_task: CreateTaskInput) -> Result<(), ServerFnError>
     let owner = auth::session::get_current_user()
         .await?
         .expect("Unable to get current user");
-    let mut task = Task::from_dto_for_owner(create_task, &owner.id).await;
+    let mut task = Task::create(create_task, &owner.id).await;
     task.save(&client).await?;
     Ok(())
 }

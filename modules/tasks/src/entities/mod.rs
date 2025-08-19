@@ -21,10 +21,7 @@ pub struct Task {
 }
 
 impl Task {
-    pub(crate) async fn from_dto_for_owner(
-        create_task: CreateTaskInput,
-        owner_id: &Uuid,
-    ) -> DbState<Task> {
+    pub(crate) async fn create(create_task: CreateTaskInput, owner_id: &Uuid) -> DbState<Task> {
         let mut task = Task::new();
         task.title = create_task.title;
         task.content = create_task.content;
