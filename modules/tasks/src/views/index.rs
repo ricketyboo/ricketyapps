@@ -21,7 +21,7 @@ pub fn TaskIndex() -> impl IntoView {
             <label>"Description"<input name="create_task[content]" /></label>
             <button>"Submit"</button>
         </ActionForm>
-        <TaskList tasks_resource/>
+        <TaskList tasks_resource />
     }
 }
 

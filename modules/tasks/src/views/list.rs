@@ -20,7 +20,7 @@ pub(super) fn TaskList(
                             <ul id="task-list">
                                 <For each=move || tasks.clone() key=|t| t.id let(task)>
                                     <li>
-                                        <TaskListItem task/>
+                                        <TaskListItem task />
                                     </li>
                                 </For>
                             </ul>
@@ -51,7 +51,7 @@ fn TaskListItem(task: TaskListItem) -> impl IntoView {
     });
     view! {
         <label>
-            <input type="checkbox" bind:checked=complete/>
+            <input type="checkbox" bind:checked=complete />
             {task.title}
         </label>
     }
