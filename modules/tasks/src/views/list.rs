@@ -58,9 +58,9 @@ fn TaskListItem(task: TaskListItem) -> impl IntoView {
 }
 #[server]
 async fn set_task_status(task_id: Uuid, completed: bool) -> Result<(), ServerFnError> {
-    use crate::entities::UpdateTask;
+    use crate::entities::Task;
     let client = common::db::use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
-    if let Some(mut task) = UpdateTask::find_by_id(&client, task_id).await? {
+    if let Some(mut task) = Task::find_by_id(&client, task_id).await? {
         if completed {
             task.completed_at = Some(chrono::Utc::now());
         } else {
