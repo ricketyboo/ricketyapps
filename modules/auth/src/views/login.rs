@@ -1,40 +1,38 @@
 use crate::dto::Credentials;
+use leptos::logging::log;
 use leptos::prelude::*;
+
 use leptos_router::components::A;
 
 #[component]
 pub fn LoginPage() -> impl IntoView {
     let action = ServerAction::<TryLogin>::new();
-    let value = Signal::derive(move || action.value().get().unwrap_or_else(|| Ok("".into())));
-
+    let value = action.value();
+    let has_error = move || value.with(|val| matches!(val, Some(Err(_))));
+    Effect::new(move || {
+        if has_error() {
+            log!("Auth error {:?}", value.get())
+        }
+    });
     view! {
         <h2>"Login"</h2>
-        <ErrorBoundary fallback=move |errors| {
-            view! {
-                <p>Error</p>
-                <ul>
-                    {move || {
-                        errors
-                            .get()
-                            .into_iter()
-                            .map(|(_, e)| view! { <li>{e.to_string()}</li> })
-                            .collect::<Vec<_>>()
-                    }}
-                </ul>
-            }
-        }>
-            // hack: this is just so the error boundary will actually trigger.
-            // I never want to display this. Replace this pattern with an error memo on the value maybe?
-            // this pattern is meant to support no JS/progressive flows; but it doesn't seem to work anyway
-            <span style="display: none">{value}</span>
-        </ErrorBoundary>
         <ActionForm action>
+            <Show when=move || has_error()>
+                <div id="login-error" class="form-error-panel">
+                    <p>Unable to login</p>
+                </div>
+            </Show>
             <label>"username"<input name="credentials[username]" /></label>
             <label>"password"<input name="credentials[password]" type="password" /></label>
             <button>Login</button>
-            // todo: wrap this with an app config check to determine if registration is available.
-            <small>"Don't have an account? "<A href="../register">"Register"</A></small>
-            <small>Go Home? <A href="/">Home</A></small>
+            <footer>
+                <p>
+                    <small>"Don't have an account? " <A href="../register">"Register"</A></small>
+                </p>
+                <p>
+                    <small>Go Home? <A href="/">Home</A></small>
+                </p>
+            </footer>
         </ActionForm>
     }
 }
@@ -66,6 +64,7 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
         }
         Err(e) => match e {
             UserDbError::UsernameExists => {
+                // todo: this is a good example of why I should split the errors up, this seems silly to have to deal with
                 unreachable!("Username exists error when trying to login")
             }
             UserDbError::UsernameNotExists => {
