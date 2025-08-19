@@ -7,7 +7,7 @@ use leptos::prelude::*;
 
 use app::*;
 use auth::dto::AuthSessionUser;
-use common::state::AppState;
+use common::state::{AppSettings, AppState};
 use leptos_axum::{LeptosRoutes, generate_route_list};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -41,6 +41,8 @@ async fn main() {
     // Generate the list of routes in your Leptos App
     let routes = generate_route_list(App);
 
+    let app_settings = AppSettings::from_env();
+
     let app_state = AppState {
         leptos_options,
         client: client.clone(),
@@ -48,10 +50,15 @@ async fn main() {
     };
 
     let app = Router::new()
-        .leptos_routes(&app_state, routes, {
-            let leptos_options = app_state.leptos_options.clone();
-            move || shell(leptos_options.clone())
-        })
+        .leptos_routes_with_context(
+            &app_state,
+            routes,
+            move || provide_context(app_settings.clone()),
+            {
+                let leptos_options = app_state.leptos_options.clone();
+                move || shell(leptos_options.clone())
+            },
+        )
         .fallback(leptos_axum::file_and_error_handler::<AppState, _>(shell))
         .layer(
             AuthSessionLayer::<AuthSessionUser, Uuid, SessionPgPool, PgPool>::new(Some(

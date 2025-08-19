@@ -6,6 +6,7 @@ use leptos_router::components::A;
 
 #[component]
 pub fn LoginPage() -> impl IntoView {
+    let registration_available = OnceResource::new_blocking(get_registration_available());
     let action = ServerAction::<TryLogin>::new();
     let value = action.value();
     let has_error = move || value.with(|val| matches!(val, Some(Err(_))));
@@ -26,12 +27,24 @@ pub fn LoginPage() -> impl IntoView {
             <label>"password"<input name="credentials[password]" type="password" /></label>
             <button>Login</button>
             <footer>
-                <p>
-                    <small>"Don't have an account? " <A href="../register">"Register"</A></small>
-                </p>
-                <p>
-                    <small>Go Home? <A href="/">Home</A></small>
-                </p>
+                <Suspense fallback=|| ()>
+                    {move || Suspend::new(async move {
+                        let can_show_reg = registration_available.await.is_ok_and(|r| r);
+                        view! {
+                            <Show when=move || { can_show_reg }>
+                                <p>
+                                    <small>
+                                        "Don't have an account? "
+                                        <A href="../register">"Register"</A>
+                                    </small>
+                                </p>
+                            </Show>
+                            <p>
+                                <small>Go Home? <A href="/">Home</A></small>
+                            </p>
+                        }
+                    })}
+                </Suspense>
             </footer>
         </ActionForm>
     }
@@ -75,4 +88,11 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
             UserDbError::UnknownError => Err(ServerFnError::new("System error")),
         },
     }
+}
+
+#[server]
+pub async fn get_registration_available() -> Result<bool, ServerFnError> {
+    use common::state::AppSettings;
+    let app_settings = use_context::<AppSettings>().expect("App settings should be available");
+    Ok(app_settings.registration_enabled)
 }
