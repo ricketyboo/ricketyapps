@@ -1,26 +1,53 @@
 use crate::dto::Credentials;
+use crate::views::login::server_fn::codec::JsonEncoding;
 use leptos::logging::log;
 use leptos::prelude::*;
 
 use leptos_router::components::A;
+use serde::{Deserialize, Serialize};
+use thiserror::Error;
+
+#[derive(Error, Debug, Clone, Deserialize, Serialize, PartialEq)]
+pub enum AuthenticationError {
+    #[error("Something went wrong")]
+    ServerFnError(ServerFnErrorErr),
+    #[error("Invalid username or password")]
+    InvalidCredentials,
+    #[error("Something went wrong")]
+    InternalServerError,
+}
+impl FromServerFnError for AuthenticationError {
+    type Encoder = JsonEncoding;
+    fn from_server_fn_error(value: ServerFnErrorErr) -> Self {
+        AuthenticationError::ServerFnError(value)
+    }
+}
 
 #[component]
 pub fn LoginPage() -> impl IntoView {
     let registration_available = OnceResource::new_blocking(get_registration_available());
     let action = ServerAction::<TryLogin>::new();
     let value = action.value();
-    let has_error = move || value.with(|val| matches!(val, Some(Err(_))));
+    // let has_error = move || value.with(|val| matches!(val, Some(Err(_))));
+    let errorMessage = Memo::new(move |_| {
+        return if let Some(Err(v)) = value.get() {
+            Some(v.to_string())
+        } else {
+            None
+        };
+    });
+
     Effect::new(move || {
-        if has_error() {
+        if errorMessage().is_some() {
             log!("Auth error {:?}", value.get())
         }
     });
     view! {
         <h2>"Login"</h2>
         <ActionForm action>
-            <Show when=move || has_error()>
+            <Show when=move || errorMessage().is_some()>
                 <div id="login-error" class="form-error-panel">
-                    <p>Unable to login</p>
+                    {errorMessage().unwrap()}
                 </div>
             </Show>
             <label>"username"<input name="credentials[username]" /></label>
@@ -51,15 +78,18 @@ pub fn LoginPage() -> impl IntoView {
 }
 
 #[server(endpoint = "auth/login")]
-pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError> {
+pub async fn try_login(credentials: Credentials) -> Result<(), AuthenticationError> {
     use crate::entities::{User, UserDbError};
     use axum::http::StatusCode;
 
-    let client = common::db::use_client().ok_or_else(|| ServerFnError::new("Server error"))?;
+    let client =
+        common::db::use_client().ok_or_else(|| AuthenticationError::InternalServerError)?;
 
     match User::get_by_credentials(credentials, &client).await {
         Ok(Some(u)) => {
-            let auth = crate::session::get_auth_session().await?;
+            let auth = crate::session::get_auth_session()
+                .await
+                .or_else(|s| Err(AuthenticationError::from_server_fn_error(s)))?;
 
             auth.login_user(u.id);
 
@@ -67,13 +97,12 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
             //  would have to have stored it in session during original auth check
 
             leptos_axum::redirect("/");
-            // todo: don't use string value here, it's just a hack to deal with error boundaries in the UI
-            Ok("Ok".into())
+            Ok(())
         }
         Ok(None) => {
             let opts = expect_context::<leptos_axum::ResponseOptions>();
             opts.set_status(StatusCode::UNAUTHORIZED);
-            Err(ServerFnError::new("Invalid credentials"))
+            Err(AuthenticationError::InvalidCredentials)
         }
         Err(e) => match e {
             UserDbError::UsernameExists => {
@@ -83,9 +112,9 @@ pub async fn try_login(credentials: Credentials) -> Result<String, ServerFnError
             UserDbError::UsernameNotExists => {
                 let opts = expect_context::<leptos_axum::ResponseOptions>();
                 opts.set_status(StatusCode::UNAUTHORIZED);
-                Err(ServerFnError::new("Invalid credentials"))
+                Err(AuthenticationError::InvalidCredentials)
             }
-            UserDbError::UnknownError => Err(ServerFnError::new("System error")),
+            UserDbError::UnknownError => Err(AuthenticationError::InternalServerError),
         },
     }
 }
