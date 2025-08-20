@@ -1,7 +1,10 @@
 use crate::dto::Credentials;
 use crate::views::login::server_fn::codec::JsonEncoding;
+use leptos::ev::SubmitEvent;
 use leptos::logging::log;
 use leptos::prelude::*;
+
+use validator::{Validate, ValidationErrors, ValidationErrorsKind};
 
 use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
@@ -28,6 +31,7 @@ pub fn LoginPage() -> impl IntoView {
     let registration_available = OnceResource::new_blocking(get_registration_available());
     let action = ServerAction::<TryLogin>::new();
     let value = action.value();
+    let validationErrors = RwSignal::new(None::<ValidationErrors>);
     // let has_error = move || value.with(|val| matches!(val, Some(Err(_))));
     let errorMessage = Memo::new(move |_| {
         return if let Some(Err(v)) = value.get() {
@@ -42,15 +46,37 @@ pub fn LoginPage() -> impl IntoView {
             log!("Auth error {:?}", value.get())
         }
     });
+
+    let on_submit = move |ev: SubmitEvent| {
+        let data = crate::views::login::TryLogin::from_event(&ev);
+        if let Ok(d) = data {
+            match d.credentials.validate() {
+                Ok(_) => {
+                    action.clear();
+                }
+                Err(e) => {
+                    action.clear();
+                    log!("{:?}", e);
+                    validationErrors.set(Some(e));
+                    // let une = find_error_for_field("username", &validationErrors.get().unwrap());
+                    ev.prevent_default();
+                }
+            }
+        }
+    };
+
     view! {
         <h2>"Login"</h2>
-        <ActionForm action>
+        <ActionForm action on:submit:capture=on_submit>
             <Show when=move || errorMessage().is_some()>
                 <div id="login-error" class="form-error-panel">
                     {errorMessage().unwrap()}
                 </div>
             </Show>
             <label>"username"<input name="credentials[username]" /></label>
+            <Show when=move|| {validationErrors.get().is_some() && validationErrors.get().unwrap().errors().contains_key("username")}>
+                <p><small>{find_error_for_field("username", &validationErrors.get().unwrap()).unwrap()}</small></p>
+            </Show>
             <label>"password"<input name="credentials[password]" type="password" /></label>
             <button>Login</button>
             <footer>
@@ -76,9 +102,23 @@ pub fn LoginPage() -> impl IntoView {
         </ActionForm>
     }
 }
+fn find_error_for_field(key: &str, errors: &ValidationErrors) -> Option<String> {
+    let e = errors.errors().get(key).unwrap();
+    match e {
+        ValidationErrorsKind::Struct(_) => None,
+        ValidationErrorsKind::List(_) => None,
+        // this is disgusting, why do I keep finding myself having to do this?
+        ValidationErrorsKind::Field(f) => Some(f.first().unwrap().code.clone().to_string()),
+    }
+}
 
 #[server(endpoint = "auth/login")]
 pub async fn try_login(credentials: Credentials) -> Result<(), AuthenticationError> {
+    // match credentials.validate() {
+    //     Ok(_) => {}
+    //     Err(_) => {}
+    // };
+
     use crate::entities::{User, UserDbError};
     use axum::http::StatusCode;
 

@@ -1,9 +1,12 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use validator::Validate;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone)]
 pub struct Credentials {
+    #[validate(length(min = 5), contains(pattern = "yes"))]
     pub username: String,
+    #[validate(length(min = 5))]
     pub password: String,
 }
 

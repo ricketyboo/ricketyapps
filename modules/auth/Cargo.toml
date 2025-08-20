@@ -15,6 +15,7 @@ thiserror.workspace = true
 
 sqlx = { workspace = true, optional = true }
 welds = { workspace = true, optional = true }
+validator = { workspace = true }
 
 # password hashes
 argon2 = { workspace = true, optional = true }
