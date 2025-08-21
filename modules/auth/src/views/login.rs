@@ -32,7 +32,6 @@ pub fn LoginPage() -> impl IntoView {
     let action = ServerAction::<TryLogin>::new();
     let value = action.value();
     let validationErrors = RwSignal::new(None::<ValidationErrors>);
-    // let has_error = move || value.with(|val| matches!(val, Some(Err(_))));
     let errorMessage = Memo::new(move |_| {
         return if let Some(Err(v)) = value.get() {
             Some(v.to_string())
@@ -49,16 +48,14 @@ pub fn LoginPage() -> impl IntoView {
 
     let on_submit = move |ev: SubmitEvent| {
         let data = crate::views::login::TryLogin::from_event(&ev);
+        action.clear();
         if let Ok(d) = data {
             match d.credentials.validate() {
-                Ok(_) => {
-                    action.clear();
-                }
+                Ok(_) => {}
                 Err(e) => {
                     action.clear();
                     log!("{:?}", e);
                     validationErrors.set(Some(e));
-                    // let une = find_error_for_field("username", &validationErrors.get().unwrap());
                     ev.prevent_default();
                 }
             }
@@ -70,9 +67,10 @@ pub fn LoginPage() -> impl IntoView {
         <ActionForm action on:submit:capture=on_submit>
             <Show when=move || errorMessage().is_some()>
                 <div id="login-error" class="form-error-panel">
-                    {errorMessage().unwrap()}
+                    {errorMessage()}
                 </div>
             </Show>
+
             <label>"username"<input name="credentials[username]" /></label>
             <Show when=move|| {validationErrors.get().is_some() && validationErrors.get().unwrap().errors().contains_key("username")}>
                 <p><small>{find_error_for_field("username", &validationErrors.get().unwrap()).unwrap()}</small></p>
@@ -102,6 +100,7 @@ pub fn LoginPage() -> impl IntoView {
         </ActionForm>
     }
 }
+
 fn find_error_for_field(key: &str, errors: &ValidationErrors) -> Option<String> {
     let e = errors.errors().get(key).unwrap();
     match e {
