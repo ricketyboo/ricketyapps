@@ -10,22 +10,27 @@ use leptos_router::{
     path,
 };
 use tasks::views::TaskIndex;
+use thaw::{ConfigProvider, Layout, Theme};
+
+use thaw::ssr::SSRMountStyleProvider;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
-        <!DOCTYPE html>
-        <html lang="en">
-            <head>
-                <meta charset="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <AutoReload options=options.clone() />
-                <HydrationScripts options />
-                <MetaTags />
-            </head>
-            <body>
-                <App />
-            </body>
-        </html>
+        <SSRMountStyleProvider>
+            <!DOCTYPE html>
+            <html lang="en">
+                <head>
+                    <meta charset="utf-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1" />
+                    <AutoReload options=options.clone() />
+                    <HydrationScripts options />
+                    <MetaTags />
+                </head>
+                <body>
+                    <App />
+                </body>
+            </html>
+        </SSRMountStyleProvider>
     }
 }
 
@@ -45,100 +50,106 @@ pub fn App() -> impl IntoView {
     let (navigated, set_navigated) = signal(None::<String>);
     let auth_resource = Resource::new_blocking(navigated, |_| check_auth());
 
+    let theme = RwSignal::new(Theme::dark());
+
     view! {
-        // injects a stylesheet into the document <head>
-        // id=leptos means cargo-leptos will hot-reload this stylesheet
-        <Stylesheet id="leptos" href="/pkg/rickety-apps.css" />
+        <ConfigProvider theme>
+            // injects a stylesheet into the document <head>
+            // id=leptos means cargo-leptos will hot-reload this stylesheet
+            <Stylesheet id="leptos" href="/pkg/rickety-apps.css" />
 
-        // sets the document title
-        <Title text="Welcome to Planner" />
+            // sets the document title
+            <Title text="Welcome to Planner" />
+            <Layout>
+                // content for this welcome page
+                <Router>
+                    <main>
+                        // todo: proper aria labels and structure
+                        <Routes fallback=|| "Page not found.".into_view()>
+                            <ParentRoute
+                                path=path!("")
+                                view=move || {
+                                    Effect::new(move || {
+                                        let url = use_url();
+                                        set_navigated(Some(url().path().to_string()));
+                                    });
+                                    view! {
+                                        <Suspense fallback=move || {
+                                            view! { <p>Loading...</p> }
+                                        }>
+                                            {move || Suspend::new(async move {
+                                                let is_logged_in = auth_resource
+                                                    .clone()
+                                                    .await
+                                                    .is_ok_and(|r| r);
+                                                view! {
+                                                    <Show
+                                                        when=move || { is_logged_in }
+                                                        fallback=move || view! { <Redirect path="/login" /> }
+                                                    >
+                                                        <div id="app-layout" class="root-layout">
+                                                            <nav id="main-nav">
+                                                                <A href="/">"Home"</A>
+                                                                <A href="/tasks">"Tasks"</A>
 
-        // content for this welcome page
-        <Router>
-            <main>
-                // todo: proper aria labels and structure
-                <Routes fallback=|| "Page not found.".into_view()>
-                    <ParentRoute
-                        path=path!("")
-                        view=move || {
-                            Effect::new(move || {
-                                let url = use_url();
-                                set_navigated(Some(url().path().to_string()));
-                            });
-                            view! {
-                                <Suspense fallback=move || {
-                                    view! { <p>Loading...</p> }
-                                }>
-                                    {move || Suspend::new(async move {
-                                        let is_logged_in = auth_resource
-                                            .clone()
-                                            .await
-                                            .is_ok_and(|r| r);
-                                        view! {
-                                            <Show
-                                                when=move || { is_logged_in }
-                                                fallback=move || view! { <Redirect path="/login" /> }
-                                            >
-                                                <div id="app-layout" class="root-layout">
-                                                    <nav id="main-nav">
-                                                        <A href="/">"Home"</A>
-                                                        <A href="/tasks">"Tasks"</A>
-
-                                                        <A href="/logout">"Logout"</A>
-                                                    </nav>
-                                                    <Outlet />
-                                                </div>
-                                            </Show>
-                                        }
-                                    })}
-                                </Suspense>
-                            }
-                        }
-                    >
-                        <Route path=path!("") view=HomePage />
-                        <Route path=path!("tasks") view=TaskIndex />
-                    </ParentRoute>
-
-                    // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model
-                    // <AuthRoutes logged_in />
-                    <ParentRoute
-                        path=path!("")
-                        view=move || {
-                            Effect::new(move || {
-                                let url = use_url();
-                                set_navigated(Some(url().path().to_string()));
-                            });
-                            view! {
-                                <Suspense fallback=move || {
-                                    view! { <p>Loading...</p> }
-                                }>
-                                    {move || Suspend::new(async move {
-                                        let is_logged_in = auth_resource.await.is_ok_and(|r| r);
-                                        view! {
-                                            <Show
-                                                when=move || {
-                                                    !is_logged_in
-                                                        || navigated().is_some_and(|u| u.eq("/logout"))
+                                                                <A href="/logout">"Logout"</A>
+                                                            </nav>
+                                                            <Outlet />
+                                                        </div>
+                                                    </Show>
                                                 }
-                                                fallback=move || view! { <Redirect path="/" /> }
-                                            >
-                                                <div id="auth-layout" class="root-layout">
-                                                    <Outlet />
-                                                </div>
-                                            </Show>
-                                        }
-                                    })}
-                                </Suspense>
-                            }
-                        }
-                    >
-                        <Route path=path!("login") view=LoginPage />
-                        <Route path=path!("register") view=RegisterPage />
-                        <Route path=path!("logout") view=LogoutPage />
-                    </ParentRoute>
-                </Routes>
-            </main>
-        </Router>
+                                            })}
+                                        </Suspense>
+                                    }
+                                }
+                            >
+                                <Route path=path!("") view=HomePage />
+                                <Route path=path!("tasks") view=TaskIndex />
+                            </ParentRoute>
+
+                            // todo: have to work out how to bring back the transparent routes from auth module, while in this new suspense model
+                            // <AuthRoutes logged_in />
+                            <ParentRoute
+                                path=path!("")
+                                view=move || {
+                                    Effect::new(move || {
+                                        let url = use_url();
+                                        set_navigated(Some(url().path().to_string()));
+                                    });
+                                    view! {
+                                        <Suspense fallback=move || {
+                                            view! { <p>Loading...</p> }
+                                        }>
+                                            {move || Suspend::new(async move {
+                                                let is_logged_in = auth_resource.await.is_ok_and(|r| r);
+                                                view! {
+                                                    <Show
+                                                        when=move || {
+                                                            !is_logged_in
+                                                                || navigated().is_some_and(|u| u.eq("/logout"))
+                                                        }
+                                                        fallback=move || view! { <Redirect path="/" /> }
+                                                    >
+                                                        <div id="auth-layout" class="root-layout">
+                                                            <Outlet />
+                                                        </div>
+                                                    </Show>
+                                                }
+                                            })}
+                                        </Suspense>
+                                    }
+                                }
+                            >
+                                <Route path=path!("login") view=LoginPage />
+                                <Route path=path!("register") view=RegisterPage />
+                                <Route path=path!("logout") view=LogoutPage />
+                            </ParentRoute>
+                        </Routes>
+                    </main>
+
+                </Router>
+            </Layout>
+        </ConfigProvider>
     }
 }
 

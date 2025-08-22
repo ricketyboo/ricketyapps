@@ -34,7 +34,11 @@ axum_session_auth = { workspace = true, optional = true }
 async-trait = { workspace = true, optional = true }
 anyhow.workspace = true
 
+#leptos 3rd party
+thaw = { workspace = true }
+
 [features]
+hydrate = ["thaw/hydrate"]
 ssr = [
     "common",
     "async-trait",
@@ -49,6 +53,7 @@ ssr = [
     "leptos/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
-    "dep:leptos_axum"
+    "dep:leptos_axum",
+    "thaw/ssr"
 ]
 

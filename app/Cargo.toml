@@ -28,9 +28,11 @@ log.workspace = true
 console_error_panic_hook.workspace = true
 console_log.workspace = true
 
+#leptos 3rd party
+thaw = { workspace = true }
 
 [features]
 default = []
-hydrate = ["leptos/hydrate"]
-ssr = ["leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum"]
+hydrate = ["leptos/hydrate", "thaw/hydrate"]
+ssr = ["leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum", "thaw/ssr"]
 

@@ -19,11 +19,19 @@ welds = { workspace = true, optional = true }
 chrono = { workspace = true }
 uuid = { workspace = true }
 
+#leptos 3rd party
+thaw = { workspace = true, optional = true }
+
 [features]
+hydrate = [
+    "leptos/hydrate",
+    "thaw/hydrate"
+]
 ssr = [
     "common",
     "auth",
     "sqlx",
     "welds",
-    "leptos_axum"
+    "leptos_axum",
+    "thaw/ssr"
 ]

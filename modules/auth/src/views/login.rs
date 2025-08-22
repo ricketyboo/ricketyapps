@@ -1,13 +1,15 @@
 use crate::dto::Credentials;
 use crate::views::login::server_fn::codec::JsonEncoding;
+use leptos::ev;
 use leptos::ev::SubmitEvent;
 use leptos::logging::log;
 use leptos::prelude::*;
 
-use validator::{Validate, ValidationErrors, ValidationErrorsKind};
+use validator::{Validate, ValidationErrors};
 
 use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
+use thaw::*;
 use thiserror::Error;
 
 #[derive(Error, Debug, Clone, Deserialize, Serialize, PartialEq)]
@@ -63,53 +65,80 @@ pub fn LoginPage() -> impl IntoView {
     };
 
     view! {
-        <h2>"Login"</h2>
-        <ActionForm action on:submit:capture=on_submit>
-            <Show when=move || errorMessage().is_some()>
-                <div id="login-error" class="form-error-panel">
-                    {errorMessage()}
-                </div>
-            </Show>
+        <Card>
+            <h2>"Login"</h2>
+            <ActionForm action on:submit:capture=on_submit>
 
-            <label>"username"<input name="credentials[username]" /></label>
-            <Show when=move|| {validationErrors.get().is_some() && validationErrors.get().unwrap().errors().contains_key("username")}>
-                <p><small>{find_error_for_field("username", &validationErrors.get().unwrap()).unwrap()}</small></p>
-            </Show>
-            <label>"password"<input name="credentials[password]" type="password" /></label>
-            <button>Login</button>
-            <footer>
-                <Suspense fallback=|| ()>
-                    {move || Suspend::new(async move {
-                        let can_show_reg = registration_available.await.is_ok_and(|r| r);
-                        view! {
-                            <Show when=move || { can_show_reg }>
-                                <p>
-                                    <small>
-                                        "Don't have an account? "
-                                        <A href="../register">"Register"</A>
-                                    </small>
-                                </p>
-                            </Show>
-                            <p>
-                                <small>Go Home? <A href="/">Home</A></small>
-                            </p>
+                <Show when=move || errorMessage().is_some()>
+                    <div id="login-error" class="form-error-panel">
+                        {errorMessage()}
+                    </div>
+                </Show>
+                <FieldContextProvider>
+                    <Field label="Username" name="credentials[username]">
+                        <Input rules=vec![InputRule::required_with_message(true.into(), "Username is required".into())] />
+                    </Field>
+                    <Field label="Password" name="credentials[password]">
+                        <Input
+                            input_type=InputType::Password
+                            rules=vec![InputRule::required_with_message(true.into(), "Password is required".into())]
+                        />
+                    </Field>
+                    <Button
+                        button_type=ButtonType::Submit
+                        on_click={
+                            let field_context = FieldContextInjection::expect_context();
+                            move |e: ev::MouseEvent| {
+                                if !field_context.validate() {
+                                    e.prevent_default();
+                                }
+                            }
                         }
-                    })}
-                </Suspense>
-            </footer>
-        </ActionForm>
+                    >
+                        "Login"
+                    </Button>
+                </FieldContextProvider>
+
+                // <label>"username"<input name="credentials[username]" /></label>
+                // <Show when=move|| {validationErrors.get().is_some() && validationErrors.get().unwrap().errors().contains_key("username")}>
+                // <p><small>{find_error_for_field("username", &validationErrors.get().unwrap()).unwrap()}</small></p>
+                // </Show>
+                // <label>"password"<input name="credentials[password]" type="password" /></label>
+                // <button>Login</button>
+                <footer>
+                    <Suspense fallback=|| ()>
+                        {move || Suspend::new(async move {
+                            let can_show_reg = registration_available.await.is_ok_and(|r| r);
+                            view! {
+                                <Show when=move || { can_show_reg }>
+                                    <p>
+                                        <small>
+                                            "Don't have an account? "
+                                            <A href="../register">"Register"</A>
+                                        </small>
+                                    </p>
+                                </Show>
+                                <p>
+                                    <small>Go Home? <A href="/">Home</A></small>
+                                </p>
+                            }
+                        })}
+                    </Suspense>
+                </footer>
+            </ActionForm>
+        </Card>
     }
 }
 
-fn find_error_for_field(key: &str, errors: &ValidationErrors) -> Option<String> {
-    let e = errors.errors().get(key).unwrap();
-    match e {
-        ValidationErrorsKind::Struct(_) => None,
-        ValidationErrorsKind::List(_) => None,
-        // this is disgusting, why do I keep finding myself having to do this?
-        ValidationErrorsKind::Field(f) => Some(f.first().unwrap().code.clone().to_string()),
-    }
-}
+// fn find_error_for_field(key: &str, errors: &ValidationErrors) -> Option<String> {
+//     let e = errors.errors().get(key).unwrap();
+//     match e {
+//         ValidationErrorsKind::Struct(_) => None,
+//         ValidationErrorsKind::List(_) => None,
+//         // this is disgusting, why do I keep finding myself having to do this?
+//         ValidationErrorsKind::Field(f) => Some(f.first().unwrap().code.clone().to_string()),
+//     }
+// }
 
 #[server(endpoint = "auth/login")]
 pub async fn try_login(credentials: Credentials) -> Result<(), AuthenticationError> {

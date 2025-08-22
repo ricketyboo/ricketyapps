@@ -1,85 +1,97 @@
-/*
-	Based on https://github.com/leptos-rs/start-trunk/blob/main/public/styles.scss
-*/
-/* --------------------- Open Props --------------------------- */
-
-/* the props */
-@import "https://unpkg.com/open-props";
-
-/* optional imports that use the props */
-@import "https://unpkg.com/open-props/normalize.min.css";
-@import "https://unpkg.com/open-props/buttons.min.css";
-
-/* ------------------------------------------------------------ */
-
-body {
-  font-family: sans-serif;
-  text-align: center;
+html, body, .thaw-config-provider {
+  height: 100%
 }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  text-align: center;
-  margin: 0 auto;
-  padding: 2rem;
+* {
+  margin: 0;
 }
 
-#main-nav {
-  display: flex;
-
-  a {
-    padding: 1rem;
-  }
-}
-
-#app-layout {
-  border: 1px solid #00f;
-}
-
-#auth-layout {
-  border: 1px solid #f00;
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-    align-items: center;
-
-    :where(small) {
-      max-inline-size: unset;
-    }
-  }
-}
-
-label:has(input:not([type="checkbox"])) {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-}
-
-
-#task-list {
-  list-style-type: none;
-  padding: 0;
-  width: fit-content;
-  margin: 0 auto;
-
-  li {
-    text-align: left;
-
-    input {
-      margin-right: 1rem;
-    }
-  }
-}
+///*
+//	Based on https://github.com/leptos-rs/start-trunk/blob/main/public/styles.scss
+//*/
+///* --------------------- Open Props --------------------------- */
+//
+///* the props */
+//@import "https://unpkg.com/open-props";
+//
+///* optional imports that use the props */
+//@import "https://unpkg.com/open-props/normalize.min.css";
+//@import "https://unpkg.com/open-props/buttons.min.css";
+//
+///* ------------------------------------------------------------ */
+//
+//body {
+//  font-family: sans-serif;
+//  text-align: center;
+//}
+//
+//.container {
+//  display: flex;
+//  flex-direction: column;
+//  justify-content: space-around;
+//  align-items: center;
+//}
+//
+//h1,
+//h2,
+//h3,
+//h4,
+//h5,
+//h6 {
+//  text-align: center;
+//  margin: 0 auto;
+//  padding: 2rem;
+//}
+//
+//#main-nav {
+//  display: flex;
+//
+//  a {
+//    padding: 1rem;
+//  }
+//}
+//
+//#app-layout {
+//  border: 1px solid #00f;
+//}
+//
+//#auth-layout {
+//  border: 1px solid #f00;
+//
+//  form {
+//    display: flex;
+//    flex-direction: column;
+//    gap: 1em;
+//    align-items: center;
+//
+//    :where(small) {
+//      max-inline-size: unset;
+//    }
+//  }
+//}
+//
+//label:has(input:not([type="checkbox"])) {
+//  display: flex;
+//  flex-direction: column;
+//  align-items: start;
+//}
+//
+//
+//#task-list {
+//  list-style-type: none;
+//  padding: 0;
+//  width: fit-content;
+//  margin: 0 auto;
+//
+//  li {
+//    text-align: left;
+//
+//    input {
+//      margin-right: 1rem;
+//    }
+//  }
+//}
